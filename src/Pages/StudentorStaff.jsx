@@ -4,8 +4,8 @@ const StudentOrStaff = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex justify-center items-center h-screen bg-blue-300">
-      <div className="bg-blue-500 text-white p-8 rounded-2xl w-96 md:w-[450px] lg:w-[500px] shadow-lg">
+    <div className="flex justify-center items-center h-screen bg-white">
+      <div className="bg-blue-500 text-white p-8 rounded-2xl w-96 md:w-[6000px] lg:w-[600px] shadow-lg">
         <button onClick={() => navigate(-1)} className="text-white text-xl mb-4">
           ⬅
         </button>

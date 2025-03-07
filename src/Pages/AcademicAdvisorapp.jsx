@@ -1,6 +1,9 @@
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import Navbar from "../Component/Navbar"; // Standard Navbar
+import Navigation from "../Component/Navigation.jsx"; // Standard Navigation
 import Footer from "../Component/Footer";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 // Image Imports
 import tutoringImg from "../assets/images/tutoring.jpg";
@@ -13,15 +16,16 @@ import academicAdvisingImg from "../assets/images/Academic advising.jpg";
 
 // Service Data
 const services = [
-  { title: "Subject-Specific Tutoring", desc: "Help with math, physics, chemistry, computer science, etc.", image: tutoringImg, path: "/tutoring" },
-  { title: "Essay Writing & Research Help", desc: "Assistance with structuring essays, citations, and thesis writing.", image: essayHelpImg, path: "/essay-help" },
-  { title: "Exam Preparation Sessions", desc: "Personalized study plans and practice tests.", image: examPrepImg, path: "/exam-prep" },
-  { title: "Time Management & Study Skills Coaching", desc: "Tips for better academic performance.", image: studySkillsImg, path: "/study-skills" },
-  { title: "Language Support", desc: "Help with English or other languages.", image: languageSupportImg, path: "/language-support" },
-  { title: "Senior Project or Thesis Guidance", desc: "Support for final-year research projects.", image: thesisGuidanceImg, path: "/thesis-guidance" },
-  { title: "Academic Advising", desc: "Help in selecting courses, understanding degree requirements, and career planning.", image: academicAdvisingImg, path: "/academic-advising" },
+  { title: "Subject-Specific Tutoring", desc: "Help with math, physics, chemistry, computer science, etc.", image: tutoringImg, path: "/DateandTime" },
+  { title: "Essay Writing & Research Help", desc: "Assistance with structuring essays, citations, and thesis writing.", image: essayHelpImg, path: "/DateandTime" },
+  { title: "Exam Preparation Sessions", desc: "Personalized study plans and practice tests.", image: examPrepImg, path: "/DateandTime" },
+  { title: "Time Management & Study Skills Coaching", desc: "Tips for better academic performance.", image: studySkillsImg, path: "/DateandTime" },
+  { title: "Language Support", desc: "Help with English or other languages.", image: languageSupportImg, path: "/DateandTime" },
+  { title: "Senior Project or Thesis Guidance", desc: "Support for final-year research projects.", image: thesisGuidanceImg, path: "/DateandTime" },
+  { title: "Academic Advising", desc: "Help in selecting courses, understanding degree requirements, and career planning.", image: academicAdvisingImg, path: "/DateandTime" },
 ];
 
+// Service Card Component
 const ServiceCard = ({ title, desc, image, path }) => (
   <div className="border rounded-lg shadow-md p-4 text-center hover:shadow-lg transition duration-300">
     <img src={image} alt={title} className="w-20 h-20 mx-auto mb-4" />
@@ -41,24 +45,15 @@ ServiceCard.propTypes = {
 };
 
 const AcademicAdvisorAppointments = () => {
+  const location = useLocation();
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Navbar */}
-      <nav className="bg-blue-500 text-white p-4 flex justify-between items-center">
-        <button className="text-2xl">☰</button>
-        <h1 className="text-sm md:text-base text-center flex-1">
-          Welcome To Your DASHBOARD
-        </h1>
-      </nav>
+      {/* Standard Navbar */}
+      <Navbar />
 
-      {/* Navigation Links */}
-      <div className="flex justify-around py-2 bg-white shadow-md text-xs md:text-sm">
-        <Link to="/dashboard" className="hover:text-blue-500 font-bold">Dashboard</Link>
-        <Link to="/todo" className="hover:text-blue-500">To-do</Link>
-        <Link to="/notifications" className="hover:text-blue-500">Notifications</Link>
-        <Link to="/inbox" className="hover:text-blue-500">Inbox</Link>
-        <Link to="/settings" className="hover:text-blue-500">Settings</Link>
-      </div>
+      {/* Standard Navigation */}
+      <Navigation activePath={location.pathname} />
 
       {/* Page Title */}
       <h1 className="text-center text-xl font-bold text-blue-600 mt-8">ACADEMIC ADVISOR APPOINTMENT</h1>

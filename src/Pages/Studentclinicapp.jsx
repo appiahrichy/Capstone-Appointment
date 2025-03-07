@@ -1,6 +1,9 @@
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import Navbar from "../Component/Navbar"; // Standard Navbar
+import Navigation from "../Component/Navigation.jsx"; // Standard Navigation
 import Footer from "../Component/Footer";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 // Image Imports
 import routineImg from "../assets/images/routine_checkup.jpg";
@@ -15,17 +18,18 @@ import specialistImg from "../assets/images/specialist.jpg";
 
 // Service Data
 const services = [
-  { title: "Routine Checkups", desc: "General health assessments.", image: routineImg, path: "/routine-checkup" },
-  { title: "First Aid & Minor Injury Treatment", desc: "For cuts, bruises, or mild sprains.", image: firstAidImg, path: "/first-aid" },
-  { title: "Chronic Illness Management", desc: "Support for conditions like asthma, diabetes, or migraines.", image: chronicImg, path: "/chronic-illness" },
+  { title: "Routine Checkups", desc: "General health assessments.", image: routineImg, path: "/DateandTime" },
+  { title: "First Aid & Minor Injury Treatment", desc: "For cuts, bruises, or mild sprains.", image: firstAidImg, path: "/DateandTime" },
+  { title: "Chronic Illness Management", desc: "Support for conditions like asthma, diabetes, or migraines.", image: chronicImg, path: "/DateandTime" },
   { title: "Cold, Flu, and Fever Consultations", desc: "Quick checkups and medication recommendations.", image: fluImg, path: "/cold-flu" },
-  { title: "Mental Health Screening", desc: "Assessments for anxiety, depression, or other concerns.", image: mentalHealthImg, path: "/mental-health" },
-  { title: "Immunizations & Vaccinations", desc: "Flu shots, HPV vaccine, etc.", image: vaccineImg, path: "/vaccinations" },
-  { title: "Laboratory Testing", desc: "Blood tests, urine tests, etc.", image: labTestImg, path: "/laboratory-testing" },
-  { title: "Prescription Refills", desc: "Consultation for ongoing medications.", image: prescriptionImg, path: "/prescriptions" },
-  { title: "Referrals to Specialists", desc: "For students needing advanced medical care.", image: specialistImg, path: "/specialist-referral" },
+  { title: "Mental Health Screening", desc: "Assessments for anxiety, depression, or other concerns.", image: mentalHealthImg, path: "/DateandTime" },
+  { title: "Immunizations & Vaccinations", desc: "Flu shots, HPV vaccine, etc.", image: vaccineImg, path: "/DateandTime" },
+  { title: "Laboratory Testing", desc: "Blood tests, urine tests, etc.", image: labTestImg, path: "/DateandTime" },
+  { title: "Prescription Refills", desc: "Consultation for ongoing medications.", image: prescriptionImg, path: "/DateandTime" },
+  { title: "Referrals to Specialists", desc: "For students needing advanced medical care.", image: specialistImg, path: "/DateandTime" },
 ];
 
+// Service Card Component
 const ServiceCard = ({ title, desc, image, path }) => (
   <div className="border rounded-lg shadow-md p-4 text-center hover:shadow-lg transition duration-300">
     <img src={image} alt={title} className="w-20 h-20 mx-auto mb-4" />
@@ -44,25 +48,16 @@ ServiceCard.propTypes = {
   path: PropTypes.string.isRequired,
 };
 
-const StudentClinicappointments = () => {
+const StudentClinicAppointments = () => {
+  const location = useLocation();
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-      {/* Navbar */}
-      <nav className="bg-blue-500 text-white p-4 flex justify-between items-center">
-        <button className="text-2xl">☰</button>
-        <h1 className="text-sm md:text-base text-center flex-1">
-          Welcome To Your DASHBOARD
-        </h1>
-      </nav>
+      {/* Standard Navbar */}
+      <Navbar />
 
-      {/* Navigation Links */}
-      <div className="flex justify-around py-2 bg-white shadow-md text-xs md:text-sm">
-        <Link to="/dashboard" className="hover:text-blue-500 font-bold">Dashboard</Link>
-        <Link to="/todo" className="hover:text-blue-500">To-do</Link>
-        <Link to="/notifications" className="hover:text-blue-500">Notifications</Link>
-        <Link to="/inbox" className="hover:text-blue-500">Inbox</Link>
-        <Link to="/settings" className="hover:text-blue-500">Settings</Link>
-      </div>
+      {/* Standard Navigation */}
+      <Navigation activePath={location.pathname} />
 
       {/* Page Title */}
       <h1 className="text-center text-xl font-bold text-blue-600 mt-8">STUDENT CLINIC APPOINTMENT</h1>
@@ -85,4 +80,4 @@ const StudentClinicappointments = () => {
   );
 };
 
-export default StudentClinicappointments;
+export default StudentClinicAppointments;

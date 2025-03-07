@@ -10,7 +10,11 @@ import Counselingapppage from './Pages/Counselingapp';
 import Hospitalapppage from './Pages/Hospitalapp';
 import Studentclinicapppage from './Pages/Studentclinicapp';
 import AcademicAdvisorapppage from './Pages/AcademicAdvisorapp';
-
+import DateandTimepage from './Pages/DateandTime';
+import Confirmationpage from './Pages/Confirmation';
+import AppointmentConfirmedpage from './Pages/AppointmentConfirmed';
+import Navbarpage from './Component/Navbar';
+import Navigationpage from './Component/Navigation.jsx';
 
 
 const App = () => {
@@ -27,6 +31,13 @@ const App = () => {
         <Route path="/Hospitalapp" element={<Hospitalapppage />} />
         <Route path="/Studentclinicapp" element={<Studentclinicapppage />} />
         <Route path="/AcademicAdvisorapp" element={<AcademicAdvisorapppage />} />
+        <Route path="/DateandTime" element={<DateandTimepage />} />
+        <Route path="/Confirmation" element={<Confirmationpage />} />
+        <Route path="/AppointmentConfirmed" element={<AppointmentConfirmedpage />} />
+        <Route path="/Navbar" element={<Navbarpage />} />
+        <Route path="/Navigation" element={<Navigationpage />} />
+        
+        
 
         
       </Routes>

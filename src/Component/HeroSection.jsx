@@ -32,8 +32,7 @@ const HeroSection = () => {
       {/* Content (Stays fixed) */}
       <div className="relative z-10 pr-12 md:pr-20 lg:pr-28 text-center">  
         <h2 className="text-4xl md:text-6xl font-bold leading-tight">
-          CAPSTONE <br />
-          APPOINTMENT
+          APPOINTMENTPro
         </h2>
         <Link to="/StudentorStaff">
           <button className="bg-gray-700 px-8 py-3 mt-6 rounded-md text-lg md:text-xl text-white transition-transform duration-300 hover:scale-105">
