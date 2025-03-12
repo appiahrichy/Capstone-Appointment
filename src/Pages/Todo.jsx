@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import Navbar from "../Component/Navbar"; // Standard Navbar
+import Navigation from "../Component/Navigation.jsx"; // Standard Navigation
+import Footer from "../Component/Footer";
+import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 const ToDoApp = () => {
   const [tasks, setTasks] = useState([
