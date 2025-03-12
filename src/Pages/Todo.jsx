@@ -5,7 +5,7 @@ import Footer from "../Component/Footer";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-const ToDoApp = () => {
+const ToDo = () => {
   const [tasks, setTasks] = useState([
     { id: 1, department: "Counseling Department", status: "pending" },
     { id: 2, department: "Hospital Department", status: "canceled" },
@@ -74,4 +74,4 @@ const ToDoApp = () => {
   );
 };
 
-export default ToDoApp;
+export default ToDo;
