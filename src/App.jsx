@@ -15,6 +15,8 @@ import Confirmationpage from './Pages/Confirmation';
 import AppointmentConfirmedpage from './Pages/AppointmentConfirmed';
 import Navbarpage from './Component/Navbar';
 import Navigationpage from './Component/Navigation.jsx';
+import Hodapppage from './Pages/Hodapp';
+
 
 
 const App = () => {
@@ -36,9 +38,7 @@ const App = () => {
         <Route path="/AppointmentConfirmed" element={<AppointmentConfirmedpage />} />
         <Route path="/Navbar" element={<Navbarpage />} />
         <Route path="/Navigation" element={<Navigationpage />} />
-        
-        
-
+        <Route path="/Hodapp" element={<Hodapppage />} />
         
       </Routes>
     </Router>

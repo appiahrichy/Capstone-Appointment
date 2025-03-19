@@ -60,6 +60,7 @@ const Dashboard = () => {
           <ServiceCard key={index} {...service} />
         ))}
       </div>
+      <br></br><br></br><br></br><br></br><br></br><br></br>
 
       {/* Footer */}
       <Footer />
