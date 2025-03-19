@@ -16,6 +16,9 @@ import Navbarpage from './Component/Navbar';
 import Navigationpage from './Component/Navigation.jsx';
 import Notificationspage from './Pages/Notifications';
 import Inboxpage from './Pages/Inbox';
+import Hodapppage from './Pages/Hodapp';
+
+
 
 const App = () => {
   return (
@@ -38,6 +41,8 @@ const App = () => {
         <Route path="/Navigation" element={<Navigationpage />} />
         <Route path="/Notifications" element={<Notificationspage />} />
         <Route path="/inbox" element={<Inboxpage />} />
+        <Route path="/Hodapp" element={<Hodapppage />} />
+        
       </Routes>
     </Router>
   );
