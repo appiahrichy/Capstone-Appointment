@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Pages/Home';
 import StudentLoginPage from './Pages/Login';
@@ -15,6 +14,8 @@ import Confirmationpage from './Pages/Confirmation';
 import AppointmentConfirmedpage from './Pages/AppointmentConfirmed';
 import Navbarpage from './Component/Navbar';
 import Navigationpage from './Component/Navigation.jsx';
+import Notificationspage from './Pages/Notifications';
+import Inboxpage from './Pages/Inbox';
 import Hodapppage from './Pages/Hodapp';
 
 
@@ -38,6 +39,8 @@ const App = () => {
         <Route path="/AppointmentConfirmed" element={<AppointmentConfirmedpage />} />
         <Route path="/Navbar" element={<Navbarpage />} />
         <Route path="/Navigation" element={<Navigationpage />} />
+        <Route path="/Notifications" element={<Notificationspage />} />
+        <Route path="/inbox" element={<Inboxpage />} />
         <Route path="/Hodapp" element={<Hodapppage />} />
         
       </Routes>
