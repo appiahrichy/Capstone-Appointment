@@ -17,6 +17,7 @@ import Navigationpage from './Component/Navigation.jsx';
 import Notificationspage from './Pages/Notifications';
 import Inboxpage from './Pages/Inbox';
 import Hodapppage from './Pages/Hodapp';
+import Testimonialpage from './Pages/Testimonial';
 
 
 
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/Notifications" element={<Notificationspage />} />
         <Route path="/inbox" element={<Inboxpage />} />
         <Route path="/Hodapp" element={<Hodapppage />} />
+        <Route path="/Testimonial" element={<Testimonialpage />} />
         
       </Routes>
     </Router>

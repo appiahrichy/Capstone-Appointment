@@ -5,7 +5,7 @@ const Footer = () => {
       <div className="flex justify-center space-x-32 mb-6">
         <a href="#" className="hover:underline">Blogs</a>
         <a href="#" className="hover:underline">Our Team</a>
-        <a href="#" className="hover:underline">Testimonials</a>
+        <a href="Testimonial" className="hover:underline">Testimonials</a>
         <a href="#" className="hover:underline">About</a>
       </div>
       <br></br>
