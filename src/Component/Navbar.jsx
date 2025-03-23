@@ -25,22 +25,22 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-500 text-white px-4 py-3 flex items-center justify-between h-16 md:h-20">
+    <nav className="bg-blue-500 text-white px-4 py-3 flex flex-wrap items-center justify-between h-auto md:h-20">
       {/* Logo on the Left */}
-      <div className="flex items-center flex-shrink-0">
+      <div className="flex items-center">
         <Link to="/">
           <img src={logo} alt="Logo" className="h-10 w-10 object-contain opacity-80" />
         </Link>
       </div>
 
-      {/* Page Title in the Center */}
-      <div className="hidden sm:flex flex-1 justify-center">
-        <h1 className="text-lg md:text-xl font-semibold text-center">{getPageTitle()}</h1>
+      {/* Page Title - Now Visible on Small Screens */}
+      <div className="w-full md:w-auto text-center mt-2 md:mt-0">
+        <h1 className="text-base sm:text-lg md:text-xl font-semibold">{getPageTitle()}</h1>
       </div>
 
-      {/* Search Bar on the Right - Adjusted Width */}
-      <div className="flex justify-end w-auto">
-        <div className="relative w-32 sm:w-40 md:w-48 lg:w-56">
+      {/* Search Bar on the Right */}
+      <div className="flex justify-end w-auto mt-2 md:mt-0">
+        <div className="relative w-28 sm:w-36 md:w-44 lg:w-52">
           <input
             type="text"
             placeholder="Search"
