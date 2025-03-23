@@ -6,7 +6,7 @@ import Navbar from "../Component/Navbar"; // Import the standard Navbar
 import Navigation from "../Component/Navigation.jsx"; // Import the standard Navigation
 import studentClinicImg from "../assets/images/Student_clinic.jpg";
 import hospitalImg from "../assets/images/Hospital.jpg";
-import counselingImg from "../assets/images/counseling.jpg";
+import counselingImg from "../assets/images/Counseling.jpg";
 import AcademicImg from "../assets/images/Academic.jpg";
 
 const services = [
