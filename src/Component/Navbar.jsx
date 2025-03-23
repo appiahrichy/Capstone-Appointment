@@ -25,31 +25,30 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-blue-500 text-white p-4 flex items-center justify-between h-20">
-      {/* Large Logo on the Left */}
-      <div className="flex flex-1 justify-start">
-      <Link to="/">
-      <img src={logo} alt="Logo" className="h-8 w-8 object-contain col-auto opacity-70" />
-
+    <nav className="bg-blue-500 text-white px-4 py-3 flex items-center justify-between h-16 md:h-20">
+      {/* Logo on the Left */}
+      <div className="flex items-center flex-shrink-0">
+        <Link to="/">
+          <img src={logo} alt="Logo" className="h-10 w-10 object-contain opacity-80" />
         </Link>
       </div>
 
       {/* Page Title in the Center */}
-      <div className="flex flex-1 justify-center">
-        <h1 className="text-xl font-semibold">{getPageTitle()}</h1>
+      <div className="hidden sm:flex flex-1 justify-center">
+        <h1 className="text-lg md:text-xl font-semibold text-center">{getPageTitle()}</h1>
       </div>
-{/* Search Bar on the Right */}
-<div className="flex flex-1 justify-end">
-  <div className="relative">
-    <input
-      type="text"
-      placeholder="Search"
-      className="px-3 py-2 pl-10 rounded-full border border-gray-300 text-black w-52 bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black w-4 h-4" />
-  </div>
-</div>
 
+      {/* Search Bar on the Right - Adjusted Width */}
+      <div className="flex justify-end w-auto">
+        <div className="relative w-32 sm:w-40 md:w-48 lg:w-56">
+          <input
+            type="text"
+            placeholder="Search"
+            className="w-full px-3 py-2 pl-10 rounded-full border border-gray-300 text-black bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 w-5 h-5" />
+        </div>
+      </div>
     </nav>
   );
 };
