@@ -8,8 +8,8 @@ import { Link } from "react-router-dom";
 // Image Imports (Ensure filenames are correct and without spaces)
 import curriculumImg from "../assets/images/Curriculum.jpg";
 import researchImg from "../assets/images/Research.jpg";
-import performanceImg from "../assets/images/performance.jpg";
-import workloadImg from "../assets/images/workload.jpg";
+import performanceImg from "../assets/images/Performance.jpg";
+import workloadImg from "../assets/images/Workload.jpg";
 import resourceImg from "../assets/images/Resource.jpg";
 import gradingImg from "../assets/images/Examination.jpg";
 import promotionImg from "../assets/images/Promotion.jpg";

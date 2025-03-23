@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import backgroundImage from '../assets/images/Landing.jpg'; // Ensure the path is correct
+import backgroundImage from '../assets/images/landing.jpg'; // Ensure the path is correct
 
 const HeroSection = () => {
   const [scale, setScale] = useState(1);

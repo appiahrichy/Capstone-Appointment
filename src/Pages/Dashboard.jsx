@@ -3,9 +3,9 @@ import Footer from "../Component/Footer";
 import Navbar from "../Component/Navbar"; // ✅ Imported Navbar
 import Navigation from "../Component/Navigation"; // ✅ Imported Navigation
 import PropTypes from "prop-types";
-import studentClinicImg from "../assets/images/student_clinic.jpg";
+import studentClinicImg from "../assets/images/Student_clinic.jpg";
 import hospitalImg from "../assets/images/Hospital.jpg";
-import counselingImg from "../assets/images/counseling.jpg";
+import counselingImg from "../assets/images/Counseling.jpg";
 import hodImg from "../assets/images/hod.jpg";
 
 // Service Data
