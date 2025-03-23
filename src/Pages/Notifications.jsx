@@ -5,18 +5,10 @@ import Navigation from "../Component/Navigation";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
-  const [userName, setUserName] = useState("User");
   const [tempNotifications, setTempNotifications] = useState(null);
   const [undoTimeout, setUndoTimeout] = useState(null);
 
   useEffect(() => {
-    const fetchUserName = async () => {
-      const storedUserName = "David";
-      setUserName(storedUserName);
-    };
-
-    fetchUserName();
-
     // Simulating API call for notifications
     setTimeout(() => {
       setNotifications([
@@ -123,7 +115,7 @@ const NotificationPage = () => {
       <Navbar />
       <Navigation />
       
-      <div className="p-6">
+      <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Your Notifications</h2>
           {notifications.length === 0 ? (

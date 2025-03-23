@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FaSearch, FaStar, FaRegStar, FaTrash } from 'react-icons/fa';
 import Navbar from '../Component/Navbar';
 import Navigation from '../Component/Navigation';
@@ -187,7 +187,7 @@ const Inbox = () => {
     setIsMessageViewOpen(true);
   };
 
-  const handleReply = (message) => {
+  const handleReply = () => {
     setIsMessageViewOpen(false);
     setIsComposeOpen(true);
   };

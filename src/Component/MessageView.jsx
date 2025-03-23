@@ -1,5 +1,5 @@
-import React from 'react';
 import { FaTimes, FaStar, FaRegStar, FaTrash, FaReply } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
 const MessageView = ({ message, isOpen, onClose, onStar, onDelete, onReply }) => {
   if (!isOpen || !message) return null;
@@ -83,6 +83,22 @@ const MessageView = ({ message, isOpen, onClose, onStar, onDelete, onReply }) =>
       </div>
     </div>
   );
+};
+
+MessageView.propTypes = {
+  message: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    subject: PropTypes.string.isRequired,
+    department: PropTypes.string.isRequired,
+    date: PropTypes.string.isRequired,
+    content: PropTypes.string,
+    starred: PropTypes.bool.isRequired
+  }),
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onStar: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onReply: PropTypes.func.isRequired
 };
 
 export default MessageView;

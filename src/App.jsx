@@ -18,35 +18,38 @@ import Notificationspage from './Pages/Notifications';
 import Inboxpage from './Pages/Inbox';
 import Hodapppage from './Pages/Hodapp';
 import Testimonialpage from './Pages/Testimonial';
-
-
+import Settingspage from './Pages/Settings';
+import { LanguageProvider } from './context/Language';
+import './styles/theme.css';
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<StudentLoginPage />} />
-        <Route path="/Stafflogin" element={<StaffloginPage />} />
-        <Route path="/StudentorStaff" element={<StudentorStaffPage />} />
-        <Route path="/Dashboard" element={<Dashboardpage />} />
-        <Route path="/Studentdashboard" element={<Studentdashboardpage />} />
-        <Route path="/Counselingapp" element={<Counselingapppage />} />
-        <Route path="/Hospitalapp" element={<Hospitalapppage />} />
-        <Route path="/Studentclinicapp" element={<Studentclinicapppage />} />
-        <Route path="/AcademicAdvisorapp" element={<AcademicAdvisorapppage />} />
-        <Route path="/DateandTime" element={<DateandTimepage />} />
-        <Route path="/Confirmation" element={<Confirmationpage />} />
-        <Route path="/AppointmentConfirmed" element={<AppointmentConfirmedpage />} />
-        <Route path="/Navbar" element={<Navbarpage />} />
-        <Route path="/Navigation" element={<Navigationpage />} />
-        <Route path="/Notifications" element={<Notificationspage />} />
-        <Route path="/inbox" element={<Inboxpage />} />
-        <Route path="/Hodapp" element={<Hodapppage />} />
-        <Route path="/Testimonial" element={<Testimonialpage />} />
-        
-      </Routes>
-    </Router>
+      <LanguageProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<StudentLoginPage />} />
+            <Route path="/stafflogin" element={<StaffloginPage />} />
+            <Route path="/studentorstaff" element={<StudentorStaffPage />} />
+            <Route path="/dashboard" element={<Dashboardpage />} />
+            <Route path="/studentdashboard" element={<Studentdashboardpage />} />
+            <Route path="/counselingapp" element={<Counselingapppage />} />
+            <Route path="/hospitalapp" element={<Hospitalapppage />} />
+            <Route path="/studentclinicapp" element={<Studentclinicapppage />} />
+            <Route path="/academicadvisorapp" element={<AcademicAdvisorapppage />} />
+            <Route path="/dateandtime" element={<DateandTimepage />} />
+            <Route path="/confirmation" element={<Confirmationpage />} />
+            <Route path="/appointmentconfirmed" element={<AppointmentConfirmedpage />} />
+            <Route path="/navbar" element={<Navbarpage />} />
+            <Route path="/navigation" element={<Navigationpage />} />
+            <Route path="/notifications" element={<Notificationspage />} />
+            <Route path="/inbox" element={<Inboxpage />} />
+            <Route path="/hodapp" element={<Hodapppage />} />
+            <Route path="/testimonial" element={<Testimonialpage />} />
+            <Route path="/settings" element={<Settingspage />} />
+          </Routes>
+        </Router>
+      </LanguageProvider>
   );
 };
 

@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import Footer from "../Component/Footer";
 import PropTypes from "prop-types";
 import Navbar from "../Component/Navbar"; // Import the standard Navbar
-import Navigation from "../Component/Navigation.jsx"; // Import the standard Navigation
-import studentClinicImg from "../assets/images/student_clinic.jpg";
+import Navigation from "../Component/Navigation"; // Import the standard Navigation
+import studentClinicImg from "../assets/images/Student_clinic.jpg";
 import hospitalImg from "../assets/images/Hospital.jpg";
-import counselingImg from "../assets/images/counseling.jpg";
+import counselingImg from "../assets/images/Counseling.jpg";
 import AcademicImg from "../assets/images/Academic.jpg";
 
 const services = [
