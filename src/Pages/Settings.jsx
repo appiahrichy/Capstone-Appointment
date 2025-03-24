@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/useLanguage';
 import Navbar from '../Component/Navbar';
 import Navigation from '../Component/Navigation';
@@ -7,6 +7,7 @@ import Navigation from '../Component/Navigation';
 const Settings = () => {
   const { currentLanguage, setCurrentLanguage, translate } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('account');
   const [theme, setTheme] = useState('light');
 
@@ -16,7 +17,14 @@ const Settings = () => {
     const savedLanguage = localStorage.getItem('language') || 'English';
     setTheme(savedTheme);
     setCurrentLanguage(savedLanguage);
-  }, [setCurrentLanguage]);
+
+    // Check for section parameter in URL
+    const params = new URLSearchParams(location.search);
+    const section = params.get('section');
+    if (section) {
+      setActiveSection(section);
+    }
+  }, [setCurrentLanguage, location.search]);
 
   // Save preferences to localStorage whenever they change
   useEffect(() => {

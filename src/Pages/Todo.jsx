@@ -3,8 +3,10 @@ import { FaSearch } from 'react-icons/fa';
 import Navbar from '../Component/Navbar';
 import Navigation from '../Component/Navigation';
 import { useLanguage } from '../context/useLanguage';
+import { useNavigate } from 'react-router-dom';
 
 const Todo = () => {
+  const navigate = useNavigate();
   const { translate } = useLanguage();
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -309,6 +311,27 @@ const Todo = () => {
     setEditFormData({
       ...editFormData,
       email: ''
+    });
+  };
+
+  const handleViewBooking = (todo) => {
+    const bookingData = {
+      id: todo.id,
+      title: todo.department,
+      date: todo.date.split(' - ')[0],
+      time: todo.date.split(' - ')[1],
+      location: todo.department,
+      status: todo.status,
+      type: todo.department.includes('Clinic') ? 'Medical' : 
+             todo.department.includes('Counseling') ? 'Counseling' : 
+             todo.department.includes('Academic') ? 'Academic' : 'General',
+      duration: todo.duration,
+      notes: todo.notes || '',
+      bookingPage: todo.bookingPage
+    };
+
+    navigate('/view-booking', { 
+      state: { booking: bookingData }
     });
   };
 
@@ -624,12 +647,16 @@ const Todo = () => {
                     {translate(`todo.status.${todo.status}`)}
                   </span>
                   <div className="flex items-center space-x-4">
-                    <a
-                      href={`/booking/${todo.id}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm transition-colors duration-200 hover:underline"
+                    <button
+                      onClick={() => handleViewBooking(todo)}
+                      className="text-blue-600 hover:text-blue-800 text-sm transition-colors duration-200 hover:underline flex items-center gap-1"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
                       {translate('todo.viewBooking')}
-                    </a>
+                    </button>
                     <button
                       onClick={(e) => {
                         e.preventDefault();

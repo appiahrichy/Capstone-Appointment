@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
   return (
     <footer className="bg-blue-500 text-white text-center py-16 text-lg">
@@ -6,7 +8,7 @@ const Footer = () => {
         <a href="#" className="hover:underline">Blogs</a>
         <a href="#" className="hover:underline">Our Team</a>
         <a href="Testimonial" className="hover:underline">Testimonials</a>
-        <a href="#" className="hover:underline">About</a>
+        <Link to="/settings?section=about" className="hover:underline">About</Link>
       </div>
       <br></br>
 
@@ -35,8 +37,8 @@ const Footer = () => {
 
       {/* Policy Links */}
       <div className="flex justify-center space-x-6 mb-2">
-        <a href="#" className="hover:underline">Privacy Policy</a>
-        <a href="#" className="hover:underline">Terms of Service</a>
+        <Link to="/settings?section=privacyAndPolicy" className="hover:underline">Privacy Policy</Link>
+        <Link to="/settings?section=termsOfUse" className="hover:underline">Terms of Service</Link>
       </div>
 
       {/* Copyright */}

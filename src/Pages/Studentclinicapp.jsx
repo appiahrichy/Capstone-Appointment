@@ -41,7 +41,7 @@ const ServiceCard = ({ title, desc, image, path }) => (
     <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">{desc}</p>
     <Link 
       to={path} 
-      className="text-blue-600 font-semibold hover:text-blue-800 transition-colors duration-200 inline-flex items-center mt-2 group-hover:translate-x-1 transition-transform"
+      className="text-blue-600 font-semibold hover:text-blue-800 transition-all duration-200 inline-flex items-center mt-2 group-hover:translate-x-1"
     >
       Book Now 
       <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
