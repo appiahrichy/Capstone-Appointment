@@ -52,10 +52,12 @@ const Dashboard = () => {
       <Navigation /> 
 
       {/* Services Section */}
-      <div className="flex-1 p-4 mt-6 grid grid-cols-1 gap-7 mx-auto max-w-6xl w-11/12">
-        {services.map((service, index) => (
-          <ServiceCard key={index} {...service} />
-        ))}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex-1 p-4 mt-6 grid grid-cols-1 gap-7 mx-auto max-w-6xl w-11/12">
+          {services.map((service, index) => (
+            <ServiceCard key={index} {...service} />
+          ))}
+        </div>
       </div>
       <br></br><br></br><br></br><br></br><br></br><br></br>
 

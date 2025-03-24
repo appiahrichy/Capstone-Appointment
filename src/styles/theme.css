@@ -1,0 +1,68 @@
+/* Light theme (default) */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+}
+
+/* Dark theme */
+.dark-theme {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-color: #374151;
+}
+
+/* Apply theme variables */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.bg-white {
+  background-color: var(--bg-primary);
+}
+
+.bg-gray-50 {
+  background-color: var(--bg-secondary);
+}
+
+.text-gray-600,
+.text-gray-700 {
+  color: var(--text-secondary);
+}
+
+.border-gray-200 {
+  border-color: var(--border-color);
+}
+
+/* Radio button styles */
+.form-radio {
+  appearance: none;
+  border: 2px solid var(--text-secondary);
+  border-radius: 50%;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-radio:checked {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  position: relative;
+}
+
+.form-radio:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+}

@@ -2,26 +2,6 @@ import { Search } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
-  const location = useLocation();
-
-  const getPageTitle = () => {
-    const path = location.pathname;
-    switch (path) {
-      case "/":
-        return "WELCOME TO YOUR DASHBOARD";
-      case "/notifications":
-        return "WELCOME TO YOUR NOTIFICATIONS";
-      case "/todo":
-        return "WELCOME TO YOUR TO-DO LIST";
-      case "/inbox":
-        return "WELCOME TO YOUR INBOX";
-      case "/settings":
-        return "WELCOME TO YOUR SETTINGS";
-      default:
-        return "WELCOME TO YOUR DASHBOARD";
-    }
-  };
-
   return (
     <nav className="bg-blue-500 text-white px-4 flex items-center justify-between w-full shadow-md 
       h-12 sm:h-14 md:h-16 lg:h-20">
@@ -51,3 +31,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

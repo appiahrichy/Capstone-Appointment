@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
+import { useLanguage } from "../context/useLanguage";
 
 const Navigation = () => {
   const location = useLocation();
+  const { translate } = useLanguage();
 
   // Get user type (either "student" or "staff"), defaulting to staff
   const userType = localStorage.getItem("userType") || "staff";
