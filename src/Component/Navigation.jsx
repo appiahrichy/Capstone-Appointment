@@ -14,21 +14,21 @@ const Navigation = () => {
   };
 
   return (
-    <div className="flex flex-wrap justify-center gap-6 sm:gap-12 md:gap-16 mt-4 text-lg text-blue-800">
+    <div className="flex flex-wrap justify-center gap-4 sm:gap-8 md:gap-12 lg:gap-16 mt-3 text-sm sm:text-base md:text-lg text-blue-800">
       {/* Dynamic dashboard link based on user type */}
-      <Link to={dashboardPath} className={`${getLinkClass(dashboardPath)} px-2`}>
+      <Link to={dashboardPath} className={`${getLinkClass(dashboardPath)} px-1 sm:px-2`}>
         Dashboard
       </Link>
-      <Link to="/todo" className={`${getLinkClass("/todo")} px-2`}>
+      <Link to="/todo" className={`${getLinkClass("/todo")} px-1 sm:px-2`}>
         To-do
       </Link>
-      <Link to="/notifications" className={`${getLinkClass("/notifications")} px-2`}>
+      <Link to="/notifications" className={`${getLinkClass("/notifications")} px-1 sm:px-2`}>
         Notifications
       </Link>
-      <Link to="/inbox" className={`${getLinkClass("/inbox")} px-2`}>
+      <Link to="/inbox" className={`${getLinkClass("/inbox")} px-1 sm:px-2`}>
         Inbox
       </Link>
-      <Link to="/settings" className={`${getLinkClass("/settings")} px-2`}>
+      <Link to="/settings" className={`${getLinkClass("/settings")} px-1 sm:px-2`}>
         Settings
       </Link>
     </div>

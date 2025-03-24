@@ -37,19 +37,15 @@ const Confirmation = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
-      {/* Standard Navbar */}
       <Navbar />
-
-      {/* Standard Navigation */}
       <Navigation activePath={location.pathname} />
 
-      {/* Confirmation Section */}
-      <div className="flex flex-col items-center mt-10">
+      <div className="flex flex-col items-center mt-6 px-4 sm:px-6">
         <h2 className="text-lg font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">
           Confirm your details
         </h2>
 
-        <div className="border border-blue-400 rounded-lg shadow-md p-6 mt-6 w-full max-w-md">
+        <div className="border border-blue-400 rounded-lg shadow-md p-6 mt-6 w-full max-w-sm sm:max-w-md">
           <Link to="/DateandTime" className="inline-block mb-4">
             <ArrowLeft className="text-blue-500" />
           </Link>
@@ -78,16 +74,15 @@ const Confirmation = () => {
                 />
               </div>
 
-              {/* Display the fetched time dynamically */}
               <p className="text-sm">Duration: 30 min</p>
               <p className="text-sm">Web conferencing details provided upon confirmation.</p>
-              <p className="text-sm mt-2">
+              <p className="text-sm mt-2 font-semibold text-blue-600">
                 {selectedTime ? selectedTime : "No time selected"}
               </p>
               <p className="text-sm">UTC Time</p>
 
               <Link to="/AppointmentConfirmed">
-                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">
+                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full text-center text-lg">
                   Schedule Event
                 </button>
               </Link>

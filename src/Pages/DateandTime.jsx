@@ -58,8 +58,9 @@ const Dashboard = () => {
         </h2>
         <hr className="w-32 mx-auto border-blue-600 mb-6" />
 
-        <div className="flex gap-4 items-center justify-center">
-          <div className="bg-white shadow-lg p-6 rounded-lg h-[500px] w-[350px]">
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-center w-full">
+          {/* Calendar Section */}
+          <div className="bg-white shadow-lg p-6 rounded-lg w-full sm:w-96">
             <div className="flex justify-between mb-4">
               <select
                 className="border p-2 rounded"
@@ -111,12 +112,13 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Time Selection Section */}
           {showTimeSelection && (
-            <div className="bg-white shadow-lg p-6 rounded-lg w-64 h-[500px] flex flex-col">
+            <div className="bg-white shadow-lg p-6 rounded-lg w-full sm:w-80">
               <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">
                 {selectedDate ? `${months[selectedMonth]} ${selectedDate}, ${selectedYear}` : "Select a Date"}
               </h3>
-              <div className="flex flex-col gap-3 flex-grow overflow-y-auto p-4">
+              <div className="flex flex-col gap-3 max-h-72 overflow-y-auto p-2">
                 {timeSlots.map((time) => (
                   <button
                     key={time}
