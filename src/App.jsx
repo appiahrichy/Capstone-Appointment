@@ -19,7 +19,8 @@ import Inboxpage from './Pages/Inbox';
 import Hodapppage from './Pages/Hodapp';
 import Testimonialpage from './Pages/Testimonial';
 import Settingspage from './Pages/Settings';
-import { LanguageProvider } from './context/Language';
+import Todopage from './Pages/Todo';
+import { LanguageProvider } from './context/LanguageProvider';
 import './styles/theme.css';
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
             <Route path="/hodapp" element={<Hodapppage />} />
             <Route path="/testimonial" element={<Testimonialpage />} />
             <Route path="/settings" element={<Settingspage />} />
+            <Route path="/todo" element={<Todopage />} />
           </Routes>
         </Router>
       </LanguageProvider>

@@ -58,11 +58,11 @@ const Testimonials = () => {
           <h2 className="text-2xl font-semibold text-blue-600 text-center mb-6">Testimonials</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {testimonials.slice(0, visibleCount).map((testimonial) => (
-              <div key={testimonial.id} className="bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center">
+              <div key={testimonial.id} className="bg-white border border-blue-200 p-6 rounded-lg shadow-md hover:shadow-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 flex flex-col items-center">
                 <img 
                   src={testimonial.image} 
                   alt={testimonial.name} 
-                  className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-gray-300" 
+                  className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-blue-200" 
                 />
                 <p className="text-gray-700 text-center italic">{testimonial.text}</p>
                 <p className="text-red-500 font-semibold mt-2">{testimonial.name}</p>

@@ -2,6 +2,26 @@ import { Search } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const getPageTitle = () => {
+    const path = window.location.pathname;
+    switch (path) {
+      case '/dashboard':
+        return 'Welcome To Your DASHBOARD';
+      case '/studentdashboard':
+        return 'Welcome To Your DASHBOARD';
+      case '/todo':
+        return 'Welcome To Your TODO';
+      case '/notifications':
+        return 'Welcome To Your NOTIFICATIONS';
+      case '/inbox':
+        return 'Welcome To Your INBOX';
+      case '/settings':
+        return 'Welcome To Your SETTINGS';
+      default:
+        return 'Welcome';
+    }
+  };
+
   return (
     <nav className="bg-blue-500 text-white px-4 flex items-center justify-between w-full shadow-md 
       h-12 sm:h-14 md:h-16 lg:h-20">

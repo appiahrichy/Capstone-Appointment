@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
 const ComposeModal = ({ isOpen, onClose, onSend }) => {
   const [recipient, setRecipient] = useState('');
@@ -90,6 +91,12 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
       </div>
     </div>
   );
+};
+
+ComposeModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSend: PropTypes.func.isRequired
 };
 
 export default ComposeModal;
