@@ -1,67 +1,52 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../Component/Navbar';
 import { useNavigate } from 'react-router-dom';
-import useLanguage from '../hooks/useLanguage';
+import { useLanguage } from '../context/useLanguage';
+import Navbar from '../Component/Navbar';
+import Navigation from '../Component/Navigation';
 
 const Settings = () => {
   const { currentLanguage, setCurrentLanguage, translate } = useLanguage();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('account');
   const [theme, setTheme] = useState('light');
-  const [language, setLanguage] = useState('English');
 
   // Load saved preferences from localStorage on component mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     const savedLanguage = localStorage.getItem('language') || 'English';
     setTheme(savedTheme);
-    setLanguage(savedLanguage);
-  }, []);
+    setCurrentLanguage(savedLanguage);
+  }, [setCurrentLanguage]);
 
   // Save preferences to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('theme', theme);
-    localStorage.setItem('language', language);
     // Apply theme to body
     document.body.className = theme === 'dark' ? 'dark-theme' : '';
-  }, [theme, language]);
+  }, [theme]);
 
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
   };
 
   const handleLanguageChange = (newLanguage) => {
-    setLanguage(newLanguage);
     setCurrentLanguage(newLanguage);
     localStorage.setItem('language', newLanguage);
   };
-
 
   const handleSectionChange = (section) => {
     setActiveSection(section);
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage
     localStorage.removeItem('userType');
     localStorage.removeItem('token');
-    // Redirect to home page
     navigate('/');
   };
 
   const handleChangeUser = () => {
-    // Redirect to the student/staff selection page
     navigate('/StudentorStaff');
   };
-
-  const tabs = [
-    { name: 'account', icon: '👤' },
-    { name: 'help', icon: '❓' },
-    { name: 'appearance', icon: '🎨' },
-    { name: 'about', icon: 'ℹ️' },
-    { name: 'privacyAndPolicy', icon: '🔒' },
-    { name: 'termsOfUse', icon: '📜' },
-  ];
 
   const renderAccountContent = () => {
     // Mock user data - in a real app this would come from your backend
@@ -200,81 +185,121 @@ const Settings = () => {
       case 'appearance':
         return (
           <div className="p-8">
-            <div className="mb-12">
-              <h3 className="text-lg font-semibold mb-4 underline">{translate('settings.theme')}</h3>
-              <div className="space-y-3">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="theme"
-                    value="light"
-                    checked={theme === 'light'}
-                    onChange={(e) => handleThemeChange(e.target.value)}
-                    className="w-4 h-4 text-blue-700"
-                  />
-                  <span>{translate('settings.light')}</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="theme"
-                    value="dark"
-                    checked={theme === 'dark'}
-                    onChange={(e) => handleThemeChange(e.target.value)}
-                    className="w-4 h-4 text-blue-700"
-                  />
-                  <span>{translate('settings.dark')}</span>
-                </label>
+            {/* Theme Selection */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 hover:shadow-xl transition-all duration-300">
+              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                Theme
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <button
+                  onClick={() => handleThemeChange('light')}
+                  className={`relative p-6 rounded-xl border-2 transition-all duration-300 transform hover:scale-[1.02] ${
+                    theme === 'light'
+                      ? 'border-blue-500 bg-blue-50 shadow-lg'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <span className="font-medium text-gray-800">Light Mode</span>
+                    </div>
+                    {theme === 'light' && (
+                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center animate-pulse">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-inner">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3 mt-2"></div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleThemeChange('dark')}
+                  className={`relative p-6 rounded-xl border-2 transition-all duration-300 transform hover:scale-[1.02] ${
+                    theme === 'dark'
+                      ? 'border-blue-500 bg-blue-50 shadow-lg'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                      </div>
+                      <span className="font-medium text-gray-800">Dark Mode</span>
+                    </div>
+                    {theme === 'dark' && (
+                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center animate-pulse">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-gray-800 rounded-lg p-4 shadow-inner">
+                    <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-2/3 mt-2"></div>
+                  </div>
+                </button>
               </div>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-4 underline">{translate('settings.language')}</h3>
-              <div className="space-y-3">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="language"
-                    value="English"
-                    checked={currentLanguage === 'English'}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
-                    className="w-4 h-4 text-blue-700"
-                  />
-                  <span>English Language</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="language"
-                    value="French"
-                    checked={currentLanguage === 'French'}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
-                    className="w-4 h-4 text-blue-700"
-                  />
-                  <span>French</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="language"
-                    value="Spanish"
-                    checked={currentLanguage === 'Spanish'}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
-                    className="w-4 h-4 text-blue-700"
-                  />
-                  <span>Spanish</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="language"
-                    value="Chinese"
-                    checked={currentLanguage === 'Chinese'}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
-                    className="w-4 h-4 text-blue-700"
-                  />
-                  <span>Chinese</span>
-                </label>
+            {/* Language Selection */}
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                Language
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[
+                  { code: 'English', name: 'English', nativeName: 'English', flag: '🇬🇧' },
+                  { code: 'French', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+                  { code: 'Spanish', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+                  { code: 'Chinese', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' }
+                ].map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className={`relative p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-[1.02] ${
+                      currentLanguage === lang.code
+                        ? 'border-blue-500 bg-blue-50 shadow-lg'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="text-3xl">{lang.flag}</div>
+                      <div className="text-center">
+                        <div className="font-medium text-gray-800">{lang.name}</div>
+                        <div className="text-sm text-gray-500">{lang.nativeName}</div>
+                      </div>
+                      {currentLanguage === lang.code && (
+                        <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center animate-pulse">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -282,58 +307,54 @@ const Settings = () => {
       case 'about':
         return (
           <div className="p-8">
-            <div className="max-w-3xl mx-auto space-y-10">
-              {/* About Us Section */}
+            <div className="max-w-3xl mx-auto space-y-8">
               <div className="text-center">
-                <h2 className="text-3xl font-bold mb-4">{translate('settings.aboutUs')}</h2>
-                <h3 className="text-xl font-semibold text-blue-600 mb-6">
-                  {translate('settings.simplifyingScheduling')}
+                <h2 className="text-2xl font-bold mb-4">About Us</h2>
+                <h3 className="text-xl font-semibold text-blue-600 mb-4">
+                  Simplifying Scheduling, Enhancing Convenience
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  {translate('settings.simplifyingDescription')}
+                  At AppointmentPro, we believe booking appointments should be effortless, efficient, and stress-free. Whether you are scheduling a consultation, reserving a service, or managing multiple bookings, our platform provides a seamless experience tailored to your needs.
                 </p>
               </div>
 
-              {/* Mission Section */}
-              <div>
-                <h3 className="text-2xl font-bold mb-4">{translate('settings.ourMission')}</h3>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Our Mission</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  {translate('settings.missionDescription')}
+                  Our mission is to revolutionize the way appointments are scheduled by providing a fast, reliable, and user-friendly platform. We aim to connect businesses and clients through a system that enhances productivity and saves valuable time.
                 </p>
               </div>
 
-              {/* Why Choose Us Section */}
-              <div>
-                <h3 className="text-2xl font-bold mb-6">{translate('settings.whyChooseUs')}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-blue-600 mb-4">📅</div>
-                    <p className="text-gray-600">{translate('settings.easyBooking')}</p>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Why Choose Us?</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Easy Booking Process — Set up and confirm appointments in just a few clicks</span>
                   </div>
-                  <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-blue-600 mb-4">🌐</div>
-                    <p className="text-gray-600">{translate('settings.availability')}</p>
+                  <div className="flex items-center justify-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>24/7 Availability — Schedule and manage bookings anytime, anywhere</span>
                   </div>
-                  <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-blue-600 mb-4">🔔</div>
-                    <p className="text-gray-600">{translate('settings.automatedReminders')}</p>
+                  <div className="flex items-center justify-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Automated Reminders — Never miss an appointment with our smart notifications</span>
                   </div>
-                  <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-blue-600 mb-4">🔒</div>
-                    <p className="text-gray-600">{translate('settings.securePrivate')}</p>
+                  <div className="flex items-center justify-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Secure & Private — Your data is protected with industry-standard encryption</span>
                   </div>
-                  <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-blue-600 mb-4">⚙️</div>
-                    <p className="text-gray-600">{translate('settings.customizable')}</p>
+                  <div className="flex items-center justify-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    <span>Customizable Scheduling — Tailor your availability and preferences with ease</span>
                   </div>
                 </div>
               </div>
 
-              {/* Our Story Section */}
-              <div>
-                <h3 className="text-2xl font-bold mb-4">{translate('settings.ourStory')}</h3>
+              <div className="text-center">
+                <h3 className="text-xl font-semibold mb-4">Our Story</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  {translate('settings.storyDescription')}
+                  Founded with a vision to eliminate scheduling frustrations, AppointmentPro was built to bridge the gap between service providers and customers. We understand the challenges of managing time efficiently, and our platform is designed to make scheduling appointments a hassle-free experience for businesses and individuals alike.
                 </p>
               </div>
             </div>
@@ -345,7 +366,7 @@ const Settings = () => {
             <div className="max-w-3xl mx-auto">
               <div className="bg-gray-50 rounded-lg p-8">
                 <h2 className="text-2xl font-bold mb-6">Privacy Policy</h2>
-                
+
                 <div className="text-sm text-gray-600 mb-8 border-b border-gray-200 pb-4">
                   <div className="flex justify-between mb-2">
                     <span>Effective Date: 01/01/2025</span>
@@ -483,7 +504,7 @@ const Settings = () => {
             <div className="max-w-3xl mx-auto">
               <div className="bg-gray-50 rounded-lg p-8">
                 <h2 className="text-2xl font-bold mb-6">Terms of Use</h2>
-                
+
                 <div className="text-sm text-gray-600 mb-8 border-b border-gray-200 pb-4">
                   <div className="flex justify-between mb-2">
                     <span>Effective Date: 01/01/2025</span>
@@ -607,35 +628,137 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="flex">
-            {/* Sidebar Navigation */}
-            <div className="w-1/5 border-r pr-8">
-              <nav className="space-y-4">
-                {tabs.map((tab) => (
-                  <div
-                    key={tab.name}
-                    onClick={() => handleSectionChange(tab.name)}
-                    className={`flex items-center cursor-pointer ${
-                      activeSection === tab.name ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'
-                    }`}
-                  >
-                    <span className="mr-2">
-                      {tab.icon}
-                    </span>
-                    <span>{translate(`settings.${tab.name}`)}</span>
-                  </div>
-                ))}
-              </nav>
+      <Navigation />
+      <div className="flex h-[calc(100vh-128px)]">
+        {/* Left Sidebar */}
+        <div className="w-64 border-r bg-white">
+          <nav className="p-4 space-y-2">
+            <div
+              onClick={() => handleSectionChange('account')}
+              className={`flex items-center cursor-pointer p-2 rounded ${
+                activeSection === 'account' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+              }`}
+            >
+              <span className="mr-3">👤</span>
+              <span>Account</span>
             </div>
+            <div
+              onClick={() => handleSectionChange('help')}
+              className={`flex items-center cursor-pointer p-2 rounded ${
+                activeSection === 'help' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+              }`}
+            >
+              <span className="mr-3">❓</span>
+              <span>Help</span>
+            </div>
+            <div
+              onClick={() => handleSectionChange('appearance')}
+              className={`flex items-center cursor-pointer p-2 rounded ${
+                activeSection === 'appearance' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+              }`}
+            >
+              <span className="mr-3">🎨</span>
+              <span>Appearance</span>
+            </div>
+            <div
+              onClick={() => handleSectionChange('about')}
+              className={`flex items-center cursor-pointer p-2 rounded ${
+                activeSection === 'about' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+              }`}
+            >
+              <span className="mr-3">ℹ️</span>
+              <span>About</span>
+            </div>
+            <div
+              onClick={() => handleSectionChange('privacyAndPolicy')}
+              className={`flex items-center cursor-pointer p-2 rounded ${
+                activeSection === 'privacyAndPolicy' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+              }`}
+            >
+              <span className="mr-3">🔒</span>
+              <span>Privacy and Policy</span>
+            </div>
+            <div
+              onClick={() => handleSectionChange('termsOfUse')}
+              className={`flex items-center cursor-pointer p-2 rounded ${
+                activeSection === 'termsOfUse' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-500'
+              }`}
+            >
+              <span className="mr-3">📜</span>
+              <span>Terms of Use</span>
+            </div>
+          </nav>
+        </div>
 
-            {/* Main Content Area */}
-            <div className="w-4/5 pl-8">
-              {renderContent()}
-            </div>
+        {/* Main Content Area */}
+        <div className="flex-1 bg-white overflow-y-auto">
+          <div className="p-8">
+            {activeSection === 'account' && (
+              <div>
+                <div className="flex justify-center mb-8">
+                  <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center text-white text-5xl font-semibold">
+                    K
+                  </div>
+                </div>
+                <div className="max-w-2xl mx-auto">
+                  <h2 className="text-2xl font-semibold text-center mb-2">Kwame O. Nkrumah</h2>
+                  <p className="text-gray-600 text-center mb-8">konkrumah@st.knust.edu.gh</p>
+                  
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-gray-600">Student ID:</p>
+                      <p className="font-medium">304567323</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Index Number:</p>
+                      <p className="font-medium">22745587</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Programme Stream:</p>
+                      <p className="font-medium">Bsc. Computer Science</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Current Year:</p>
+                      <p className="font-medium">Year 3</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Programme Option:</p>
+                      <p className="font-medium">General</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Gender:</p>
+                      <p className="font-medium">Male</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Status:</p>
+                      <p className="font-medium">Continuing Ghanaian Student</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Campus:</p>
+                      <p className="font-medium">KNUST-Kumasi</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-center gap-4 mt-8">
+                    <button
+                      onClick={handleChangeUser}
+                      className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Change User
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {activeSection !== 'account' && renderContent()}
           </div>
         </div>
       </div>

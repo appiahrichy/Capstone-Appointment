@@ -128,7 +128,7 @@ const NotificationPage = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`bg-white p-4 rounded-lg border-l-4 shadow-md transition-all hover:shadow-lg ring-1 ring-blue-400 ${
+                  className={`bg-white p-4 rounded-lg border-l-4 shadow-md transition-all duration-200 hover:shadow-lg hover:border-blue-300 hover:bg-blue-50 ${
                     notification.priority === "high" 
                       ? "border-red-500" 
                       : notification.priority === "medium"

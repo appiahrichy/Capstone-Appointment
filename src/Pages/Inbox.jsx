@@ -346,7 +346,7 @@ const Inbox = () => {
                   <div
                     key={message.id}
                     onClick={() => handleMessageClick(message)}
-                    className="flex items-center p-4 border border-blue-200 rounded-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    className="flex items-center p-4 border border-blue-200 rounded-md hover:shadow-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
                   >
                     <input
                       type="checkbox"

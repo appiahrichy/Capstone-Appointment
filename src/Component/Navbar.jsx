@@ -1,6 +1,6 @@
-import { Menu, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png";
+import logo from "../assets/images/favicon.png";
 
 const Navbar = () => {
   const getPageTitle = () => {

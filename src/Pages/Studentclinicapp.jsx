@@ -31,12 +31,22 @@ const services = [
 
 // Service Card Component
 const ServiceCard = ({ title, desc, image, path }) => (
-  <div className="border rounded-lg shadow-md p-4 text-center hover:shadow-lg transition duration-300">
-    <img src={image} alt={title} className="w-20 h-20 mx-auto mb-4" />
-    <h3 className="font-semibold text-lg">{title}</h3>
-    <p className="text-sm text-gray-600">{desc}</p>
-    <Link to={path} className="text-blue-500 font-semibold mt-2 inline-block hover:underline">
-      Book Now →
+  <div className="border border-blue-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300 hover:bg-blue-50 bg-white overflow-hidden p-5 text-center transform hover:scale-[1.02] group">
+    <img 
+      src={image} 
+      alt={title} 
+      className="w-20 h-20 mx-auto mb-4 transform group-hover:scale-110 transition-transform duration-300" 
+    />
+    <h3 className="font-semibold text-lg text-blue-600 group-hover:text-blue-800 transition-colors">{title}</h3>
+    <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">{desc}</p>
+    <Link 
+      to={path} 
+      className="text-blue-600 font-semibold hover:text-blue-800 transition-colors duration-200 inline-flex items-center mt-2 group-hover:translate-x-1 transition-transform"
+    >
+      Book Now 
+      <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+      </svg>
     </Link>
   </div>
 );
@@ -59,19 +69,25 @@ const StudentClinicAppointments = () => {
       {/* Standard Navigation */}
       <Navigation activePath={location.pathname} />
 
-      {/* Page Title */}
-      <h1 className="text-center text-xl font-bold text-blue-600 mt-8">STUDENT CLINIC APPOINTMENT</h1>
+      {/* Student Clinic Appointment Title */}
+      <h2 className="text-center text-2xl font-semibold text-blue-600 mt-6 hover:text-blue-800 transition-colors duration-300">
+        STUDENT CLINIC APPOINTMENT
+      </h2>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-5xl mx-auto">
-        {services.map((service, index) => (
-          <ServiceCard key={index} {...service} />
-        ))}
+      {/* Services Section */}
+      <div className="flex-1 p-5 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto max-w-6xl w-11/12">
+          {services.map((service, index) => (
+            <div key={index} className="transform hover:scale-[1.01] transition-all duration-300">
+              <ServiceCard {...service} />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Quote */}
-      <p className="text-center text-gray-700 mt-6 mb-10 italic">
-        Your well-being matters—book your student clinic appointment today for a healthier tomorrow!
+      <p className="text-center text-gray-700 mt-10 mb-6 text-sm hover:text-gray-800 transition-colors duration-300">
+        Your health is our priority—schedule your appointment today for a healthier tomorrow.
       </p>
 
       {/* Footer */}

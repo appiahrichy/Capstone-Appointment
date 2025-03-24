@@ -31,12 +31,22 @@ const appointments = [
 
 // Appointment Card Component
 const AppointmentCard = ({ title, desc, image, path }) => (
-  <div className="border rounded-lg shadow-md p-4 text-center hover:shadow-lg transition duration-300">
-    <img src={image} alt={title} className="w-20 h-20 mx-auto mb-4" />
-    <h3 className="font-semibold text-lg">{title}</h3>
-    <p className="text-sm text-gray-600">{desc}</p>
-    <Link to={path} className="text-blue-500 font-semibold mt-2 inline-block hover:underline">
-      Book Now →
+  <div className="border border-blue-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300 hover:bg-blue-50 bg-white overflow-hidden p-5 text-center transform hover:scale-[1.02] group">
+    <img 
+      src={image} 
+      alt={title} 
+      className="w-20 h-20 mx-auto mb-4 transform group-hover:scale-110 transition-transform duration-300" 
+    />
+    <h3 className="font-semibold text-lg text-blue-600 group-hover:text-blue-800 transition-colors">{title}</h3>
+    <p className="text-sm text-gray-600 group-hover:text-gray-700 transition-colors">{desc}</p>
+    <Link 
+      to={path} 
+      className="text-blue-600 font-semibold hover:text-blue-800 transition-all duration-200 inline-flex items-center mt-2 group-hover:translate-x-1"
+    >
+      Book Now 
+      <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+      </svg>
     </Link>
   </div>
 );
@@ -52,20 +62,24 @@ const HODAppointment = () => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
       <Navigation activePath={location.pathname} />
       
       <div className="flex-grow">
-        <h1 className="text-center text-xl font-bold text-blue-600 mt-8">HOD APPOINTMENT</h1>
+        <h2 className="text-center text-2xl font-semibold text-blue-600 mt-6 hover:text-blue-800 transition-colors duration-300">
+          HOD APPOINTMENT
+        </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-5xl mx-auto">
           {appointments.map((appointment, index) => (
-            <AppointmentCard key={index} {...appointment} />
+            <div key={index} className="transform hover:scale-[1.01] transition-all duration-300">
+              <AppointmentCard {...appointment} />
+            </div>
           ))}
         </div>
         
-        <p className="text-center text-gray-700 mt-6 mb-20 italic">
+        <p className="text-center text-gray-700 mt-6 mb-20 italic hover:text-gray-800 transition-colors duration-300">
           Your academic and professional growth matter—schedule a meeting with your HOD today for a smoother and more productive journey!
         </p>
       </div>
