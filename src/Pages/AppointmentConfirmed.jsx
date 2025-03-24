@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+
 import { CheckCircle } from "lucide-react";
 import Navbar from "../Component/Navbar"; // Importing the Navbar
 import Navigation from "../Component/Navigation"; // Importing the Navigation
@@ -21,12 +21,7 @@ const AppointmentConfirmation = () => {
           </div>
           <p className="text-gray-700 text-sm sm:text-base">Appointment Confirmed</p>
           <div className="mt-4">
-            <Link
-              to="/appointment-details"
-              className="px-4 py-2 text-blue-600 border border-blue-400 rounded-lg hover:bg-blue-500 hover:text-white text-sm sm:text-base"
-            >
-              View Details
-            </Link>
+            
           </div>
         </div>
       </div>

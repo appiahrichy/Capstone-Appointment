@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../Component/Navbar";
 import Navigation from "../Component/Navigation.jsx";
 import { Link } from "react-router-dom";
@@ -10,6 +10,9 @@ const Dashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [showTimeSelection, setShowTimeSelection] = useState(false);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -18,34 +21,34 @@ const Dashboard = () => {
 
   const years = ["2024", "2025", "2026", "2027", "2028"];
 
-  const generateTimeSlots = () => {
-    const slots = [];
-    let hour = 9;
-    let minute = 0;
-
-    while (hour < 17 || (hour === 17 && minute === 0)) {
-      const formattedTime = `${hour.toString().padStart(2, "0")}:${minute === 0 ? "00" : "30"} ${
-        hour < 12 ? "AM" : "PM"
-      }`;
-      slots.push(formattedTime);
-      if (minute === 0) {
-        minute = 30;
-      } else {
-        minute = 0;
-        hour++;
-      }
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
-
   const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
+
+  useEffect(() => {
+    // Fetch booking dates and times from backend
+    const fetchBookings = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch("http://localhost:5000/api/bookings"); // Update with your API URL
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings.");
+        }
+        const data = await response.json();
+        setBookings(data);
+      } catch (err) {
+        setError(err.message);
+      }
+      setLoading(false);
+    };
+
+    fetchBookings();
+  }, []);
 
   const handleDateClick = (day) => {
     setSelectedDate(day);
     setShowTimeSelection(true);
+    setSelectedTime(null);
   };
 
   return (
@@ -118,21 +121,36 @@ const Dashboard = () => {
               <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">
                 {selectedDate ? `${months[selectedMonth]} ${selectedDate}, ${selectedYear}` : "Select a Date"}
               </h3>
-              <div className="flex flex-col gap-3 max-h-72 overflow-y-auto p-2">
-                {timeSlots.map((time) => (
-                  <button
-                    key={time}
-                    className={`w-full py-2 border rounded-lg text-lg font-medium transition-all duration-200 ${
-                      selectedTime === time
-                        ? "bg-blue-600 text-white shadow-lg scale-105"
-                        : "border-blue-400 text-blue-600 hover:bg-blue-100"
-                    }`}
-                    onClick={() => setSelectedTime(time)}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
+
+              {loading ? (
+                <p className="text-center text-blue-600">Loading available times...</p>
+              ) : error ? (
+                <p className="text-center text-red-600">{error}</p>
+              ) : (
+                <div className="flex flex-col gap-3 max-h-72 overflow-y-auto p-2">
+                  {bookings
+                    .filter(
+                      (booking) =>
+                        booking.date === `${selectedYear}-${(selectedMonth + 1)
+                          .toString()
+                          .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
+                    )
+                    .map((booking) => (
+                      <button
+                        key={booking.time}
+                        className={`w-full py-2 border rounded-lg text-lg font-medium transition-all duration-200 ${
+                          selectedTime === booking.time
+                            ? "bg-blue-600 text-white shadow-lg scale-105"
+                            : "border-blue-400 text-blue-600 hover:bg-blue-100"
+                        }`}
+                        onClick={() => setSelectedTime(booking.time)}
+                      >
+                        {booking.time}
+                      </button>
+                    ))}
+                </div>
+              )}
+
               <Link to="/Confirmation">
                 <button
                   className="mt-4 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 w-full text-lg"

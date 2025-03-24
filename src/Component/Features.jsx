@@ -1,22 +1,37 @@
 import { useState } from "react";
 
-// ConnectButton Component
-const ConnectButton = () => {
+const ConnectButton = ({ platform }) => {
   const [connected, setConnected] = useState(false);
+
+  const handleConnect = () => {
+    let authUrl = "";
+
+    if (platform === "Google Calendar") {
+      authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=YOUR_GOOGLE_CLIENT_ID&redirect_uri=${encodeURIComponent(
+        "http://localhost:3000"
+      )}&response_type=token&scope=https://www.googleapis.com/auth/calendar.events.readonly&access_type=offline`;
+    } else if (platform === "Outlook Calendar" || platform === "Exchange Calendar") {
+      authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=YOUR_MICROSOFT_CLIENT_ID&response_type=token&redirect_uri=${encodeURIComponent(
+        "http://localhost:3000"
+      )}&scope=calendars.read`;
+    }
+
+    // Open authentication window
+    window.open(authUrl, "_self");
+  };
 
   return (
     <button
       className={`text-sm font-semibold transition-colors duration-300 ${
         connected ? "text-green-500" : "text-blue-500"
       }`}
-      onClick={() => setConnected(!connected)}
+      onClick={handleConnect}
     >
       {connected ? "Connected ✅" : "Connect →"}
     </button>
   );
 };
 
-// AppointmentPlatform Component
 export default function AppointmentPlatform() {
   return (
     <div className="flex flex-col items-center w-full p-4 md:p-12">
@@ -34,35 +49,19 @@ export default function AppointmentPlatform() {
         {/* Left Side - Features List */}
         <div className="w-full md:w-1/2 space-y-6 p-4 md:p-8">
           {[
-            {
-              title: "Connect your calendar",
-              description:
-                "Calendly connects up to six calendars to automate scheduling with real-time availability.",
-            },
-            {
-              title: "Add your availability",
-              description:
-                "Calendly connects up to six calendars to automate scheduling with real-time availability.",
-            },
-            {
-              title: "Connect conferencing tools",
-              description:
-                "Sync your video conferencing tools and set preferences for in-person meetings or calls.",
-            },
-            {
-              title: "Customize your event type",
-              description:
-                "Choose from pre-built templates or quickly create custom event types for any meeting you need to schedule.",
-            },
-            {
-              title: "Share your scheduling link",
-              description:
-                "Easily book meetings by embedding scheduling links on your website, landing pages, or emails.",
-            },
-          ].map(({ title, description }) => (
+            "Connect your calendar",
+            "Add your availability",
+            "Connect conferencing tools",
+            "Customize your event type",
+            "Share your scheduling link",
+          ].map((title) => (
             <div key={title}>
               <h3 className="text-blue-500 font-semibold text-lg md:text-xl">{title}</h3>
-              <p className="text-gray-600 text-sm md:text-base">{description}</p>
+              <p className="text-gray-600 text-sm md:text-base">
+                {title === "Connect your calendar"
+                  ? "Integrate with Google, Outlook, and Exchange for real-time availability."
+                  : "Easily manage your appointments with automated scheduling."}
+              </p>
             </div>
           ))}
         </div>
@@ -84,7 +83,7 @@ export default function AppointmentPlatform() {
                     <span className="text-2xl">{icon}</span>
                     <span className="text-gray-700 font-medium text-base md:text-lg">{platform}</span>
                   </div>
-                  <ConnectButton />
+                  <ConnectButton platform={platform} />
                 </div>
               ))}
             </div>
