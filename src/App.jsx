@@ -22,6 +22,7 @@ import Settingspage from './Pages/Settings';
 import Todopage from './Pages/Todo';
 import { LanguageProvider } from './context/LanguageProvider';
 import './styles/theme.css';
+import ViewBookingpage from './Pages/ViewBooking';
 
 const App = () => {
   return (
@@ -49,6 +50,7 @@ const App = () => {
             <Route path="/testimonial" element={<Testimonialpage />} />
             <Route path="/settings" element={<Settingspage />} />
             <Route path="/todo" element={<Todopage />} />
+            <Route path="/ViewBooking" element={<ViewBookingpage />} />
           </Routes>
         </Router>
       </LanguageProvider>

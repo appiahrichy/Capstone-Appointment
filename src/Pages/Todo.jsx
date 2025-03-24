@@ -330,7 +330,7 @@ const Todo = () => {
       bookingPage: todo.bookingPage
     };
 
-    navigate('/view-booking', { 
+    navigate('/ViewBooking', { 
       state: { booking: bookingData }
     });
   };
