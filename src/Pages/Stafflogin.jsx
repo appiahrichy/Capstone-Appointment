@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { authenticateStaff } from '../database';
 
 const StaffLoginPage = () => {
   const [username, setUsername] = useState("")
@@ -19,32 +19,28 @@ const StaffLoginPage = () => {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch("/api/staff/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password, staffId }),
-      })
-
-      if (response.ok) {
-        // Navigate to dashboard if login is successful
-        navigate("/Dashboard")
+      console.log("Attempting staff login with:", { 
+        username, 
+        staffId,
+        password: "***" // Don't log actual password
+      });
+      const result = authenticateStaff(username, password, staffId);
+      console.log("Staff login result:", result);
+      
+      if (result.success) {
+        console.log("Login successful for staff:", result.staff);
+        localStorage.setItem('staffInfo', JSON.stringify(result.staff));
+        navigate("/Staffdashboard")
       } else {
-        // Show error message for invalid credentials
-        const data = await response.json()
-        setError(data.error || "Login failed. Please check your credentials.")
+        console.log("Login failed:", result.message);
+        setError(result.message);
       }
     } catch (err) {
-      console.error(err) // Log the actual error
+      console.error("Staff login error:", err)
       setError("An error occurred. Please try again later.")
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const handleCreateTicket = () => {
-    navigate("/support/create-ticket")
   }
 
   return (
@@ -56,14 +52,17 @@ const StaffLoginPage = () => {
 
       {/* Right Section - Login Form */}
       <div className="w-full md:w-2/3 flex flex-col justify-center items-center bg-white p-6 sm:p-8">
-        <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Login to your account</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">Staff Login</h2>
 
         {/* Login Form */}
         <form className="w-full max-w-xs sm:max-w-sm md:max-w-md" onSubmit={handleLogin}>
           <div className="mb-3 sm:mb-4">
-            <label className="block text-gray-700 mb-1 text-sm sm:text-base">Username</label>
+            <label htmlFor="staff-username" className="block text-gray-700 mb-1 text-sm sm:text-base">Username</label>
             <input
               type="text"
+              id="staff-username"
+              name="username"
+              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -72,22 +71,28 @@ const StaffLoginPage = () => {
           </div>
 
           <div className="mb-3 sm:mb-4">
-            <label className="block text-gray-700 mb-1 text-sm sm:text-base">Password</label>
+            <label htmlFor="staff-id" className="block text-gray-700 mb-1 text-sm sm:text-base">Staff ID</label>
             <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type="text"
+              id="staff-id"
+              name="staffId"
+              autoComplete="off"
+              value={staffId}
+              onChange={(e) => setStaffId(e.target.value)}
               required
               className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
 
-          <div className="mb-4 sm:mb-6">
-            <label className="block text-gray-700 mb-1 text-sm sm:text-base">Staff ID</label>
+          <div className="mb-3 sm:mb-4">
+            <label htmlFor="staff-password" className="block text-gray-700 mb-1 text-sm sm:text-base">Password</label>
             <input
-              type="text"
-              value={staffId}
-              onChange={(e) => setStaffId(e.target.value)}
+              type="password"
+              id="staff-password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
@@ -96,29 +101,27 @@ const StaffLoginPage = () => {
           {/* Show error message if login fails */}
           {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
-          {/* Login Button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-500 text-white py-2 rounded-md text-sm sm:text-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70"
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Logging in..." : "Login"}
           </button>
+
+          <div className="mt-4 text-center text-sm">
+            <Link to="/forgot-password" className="text-blue-500 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
+
+          <div className="mt-2 text-center text-sm">
+            Having issues with your account?{" "}
+            <Link to="/register" className="text-blue-500 hover:underline">
+              Create a ticket
+            </Link>
+          </div>
         </form>
-
-        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md mt-3 text-center">
-          <Link to="/forgot-password" className="text-blue-500 hover:underline text-sm">
-            Forgot your password?
-          </Link>
-        </div>
-
-        {/* Support Section */}
-        <p className="text-gray-600 text-xs sm:text-sm mt-4 text-center">
-          Having issues with your account?{" "}
-          <span className="text-blue-500 hover:underline" onClick={handleCreateTicket}>
-            Create a ticket
-          </span>
-        </p>
       </div>
     </div>
   )

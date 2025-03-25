@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { authenticateStudent } from '../database';
 
 const LoginPage = () => {
   const [username, setUsername] = useState("")
@@ -16,24 +17,24 @@ const LoginPage = () => {
     setError("") // Clear previous errors
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password, studentId }),
-      })
-
-      if (response.ok) {
-        // Navigate to dashboard if login is successful
+      console.log("Attempting student login with:", { 
+        username, 
+        studentId,
+        password: "***" // Don't log actual password
+      });
+      const result = authenticateStudent(username, password, studentId);
+      console.log("Student login result:", result);
+      
+      if (result.success) {
+        console.log("Login successful for student:", result.student);
+        localStorage.setItem('studentInfo', JSON.stringify(result.student));
         navigate("/Studentdashboard")
       } else {
-        // Show error message for invalid credentials
-        const data = await response.json()
-        setError(data.error || "Login failed. Please check your credentials.")
+        console.log("Login failed:", result.message);
+        setError(result.message);
       }
     } catch (err) {
-      console.error(err) // Log the actual error
+      console.error("Student login error:", err)
       setError("An error occurred. Please try again later.")
     }
   }
@@ -52,9 +53,12 @@ const LoginPage = () => {
         {/* Login Form */}
         <form className="w-full max-w-xs sm:max-w-sm md:max-w-md" onSubmit={handleLogin}>
           <div className="mb-3 sm:mb-4">
-            <label className="block text-gray-700 mb-1 text-sm sm:text-base">Username</label>
+            <label htmlFor="student-username" className="block text-gray-700 mb-1 text-sm sm:text-base">Username</label>
             <input
               type="text"
+              id="student-username"
+              name="username"
+              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -63,22 +67,28 @@ const LoginPage = () => {
           </div>
 
           <div className="mb-3 sm:mb-4">
-            <label className="block text-gray-700 mb-1 text-sm sm:text-base">Password</label>
+            <label htmlFor="student-id" className="block text-gray-700 mb-1 text-sm sm:text-base">Student ID</label>
             <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type="text"
+              id="student-id"
+              name="studentId"
+              autoComplete="off"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
               required
               className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
           </div>
 
-          <div className="mb-4 sm:mb-6">
-            <label className="block text-gray-700 mb-1 text-sm sm:text-base">Student ID</label>
+          <div className="mb-3 sm:mb-4">
+            <label htmlFor="student-password" className="block text-gray-700 mb-1 text-sm sm:text-base">Password</label>
             <input
-              type="text"
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
+              type="password"
+              id="student-password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
             />
@@ -101,7 +111,7 @@ const LoginPage = () => {
           </div>
 
           <div className="mt-2 text-center text-sm">
-          Having issues with your account?{" "}
+            Having issues with your account?{" "}
             <Link to="/register" className="text-blue-500 hover:underline">
               Create a ticket
             </Link>
