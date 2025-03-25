@@ -42,33 +42,42 @@ const ComposeModal = ({ isOpen, onClose, onSend }) => {
           <div className="mb-4">
             <input
               type="text"
+              id="compose-recipient"
+              name="compose-recipient"
               placeholder="To"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               required
+              aria-label="Message recipient"
             />
           </div>
           
           <div className="mb-4">
             <input
               type="text"
+              id="compose-subject"
+              name="compose-subject"
               placeholder="Subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               required
+              aria-label="Message subject"
             />
           </div>
           
           <div className="mb-4">
             <textarea
+              id="compose-message"
+              name="compose-message"
               placeholder="Message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows="10"
               className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 resize-none"
               required
+              aria-label="Message content"
             />
           </div>
           

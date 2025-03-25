@@ -1,7 +1,9 @@
 // Database object to store both students and staff
 const database = {
   students: [],
-  staff: []
+  staff: [],
+  appointments: [],
+  notifications: []
 };
 
 // Function to generate username from full name
@@ -13,7 +15,27 @@ function generateUsername(fullName) {
     .trim();
 }
 
-// Complete Students Data
+// Function to determine gender based on first name
+function determineGender(name) {
+  // List of common male and female first names
+  const maleNames = ['david', 'john', 'mark', 'jonas', 'emile', 'wycliffe', 'enoch', 'stephen', 'jeddy', 'charles', 'kelvin', 'francis', 'albert', 'emmanuel', 'philip', 'godfred', 'collins', 'frank', 'gabriel', 'daniel', 'samuel', 'prince', 'william', 'isaac', 'felix'];
+  const femaleNames = ['christabel', 'linda', 'judith', 'michelle', 'emmanuella', 'eunice', 'deborah', 'ruth', 'mary', 'blessing', 'suraiya', 'martha'];
+  
+  const firstName = name.split(',')[1]?.trim().split(' ')[0].toLowerCase() || '';
+  
+  if (maleNames.includes(firstName)) return 'Male';
+  if (femaleNames.includes(firstName)) return 'Female';
+  
+  // Default to Male if name is not in the lists (as per requirement of majority being male)
+  return 'Male';
+}
+
+// Function to randomly assign programme option with 2/3 probability for General
+function assignProgrammeOption() {
+  return Math.random() < 0.67 ? 'General' : 'Fee-Paying';
+}
+
+// Process students data
 const studentsData = [
   { index: '3359122', name: 'ABATEY, David Alegre' },
   { index: '3365822', name: 'AGYEMANG, Christabel Yaa' },
@@ -247,7 +269,7 @@ const studentsData = [
   { index: '3389022', name: 'DOGBEY, Rejoice Elike' },
   { index: '3395522', name: 'KONADU, Nana Kwame Amoateng' },
   { index: '3401822', name: 'NIMAKO, Evans' },
-  { index: '3409022', name: 'OWIREDU, David Kwaku Kuffour' },
+  { index: '3409022', name: 'OWUSU, David Kwaku Kuffour' },
   { index: '3415922', name: 'TETTEH, Michael Narh' },
   { index: '3361822', name: 'ACQUANDOH, Esther Efua' },
   { index: '3368422', name: 'AMARTEY, Roland Teye' },
@@ -523,7 +545,7 @@ const studentsData = [
   { index: '3371522', name: 'ANNING, Bright' },
   { index: '3378222', name: 'ASIPUNU, Desmond Dela' },
   { index: '3385622', name: 'BOYE, Ericson Martey' },
-  { index: '3392322', name: 'GODSON, Nhyira Akua' },
+  { index: '3392322', name: 'GOMADO, Bill Horla' },
   { index: '3398722', name: 'MACCARTHY, Henorkam Tetteh' },
   { index: '3405322', name: 'ODURO-GYAMINAH, Bismark Nana Yaw Opoku' },
   { index: '3412722', name: 'SAMIRU, Nasser Jadagwa' },
@@ -553,7 +575,26 @@ const studentsData = [
   { index: '3399112', name: 'MARFO, Felix Owusu Akwasi' },
   { index: '3405722', name: 'OFUATEY-KODJOE, Alex Junior' },
   { index: '3413122', name: 'SARKODIE - ADDO, Justice Junior' }
-];
+].map(student => {
+  const username = generateUsername(student.name);
+  return {
+    name: student.name,
+    studentId: student.index,
+    username: username,
+    email: `${username}@st.knust.edu.gh`,
+    programmeStream: 'Bsc. Computer Science',
+    programmeOption: assignProgrammeOption(),
+    currentYear: 'Year 3',
+    gender: determineGender(student.name),
+    campus: 'KNUST-Kumasi',
+    status: 'Continuing Ghanaian Student',
+    indexNumber: student.index,
+    password: student.index // Using student ID as default password
+  };
+});
+
+// Initialize database with processed student data
+database.students = studentsData;
 
 // Complete Staff Data (without email)
 const staffData = [
@@ -589,14 +630,6 @@ const staffData = [
   { firstName: 'Samuel', lastName: 'Nti', pin: '36656565' }
 ];
 
-// Process students
-database.students = studentsData.map(student => ({
-  fullName: student.name,
-  studentId: student.index,
-  username: generateUsername(student.name),
-  password: student.index
-}));
-
 // Process staff
 database.staff = staffData.map(staff => ({
   fullName: `${staff.firstName} ${staff.lastName}`,
@@ -608,7 +641,6 @@ database.staff = staffData.map(staff => ({
 // Authentication functions
 export function authenticateStudent(username, password, studentId) {
   console.log("Authenticating student with:", { username, studentId, password });
-  console.log("Available students:", database.students.map(s => ({ username: s.username, studentId: s.studentId })));
   
   const student = database.students.find(s => 
     s.username === username && 
@@ -621,9 +653,18 @@ export function authenticateStudent(username, password, studentId) {
     return {
       success: true,
       student: {
-        name: student.fullName,
+        name: student.name,
         studentId: student.studentId,
-        username: student.username
+        username: student.username,
+        email: student.email,
+        programmeStream: student.programmeStream,
+        programmeOption: student.programmeOption,
+        currentYear: student.currentYear,
+        gender: student.gender,
+        campus: student.campus,
+        status: student.status,
+        indexNumber: student.indexNumber,
+        password: student.password // Include password for future updates
       }
     };
   }
@@ -631,7 +672,7 @@ export function authenticateStudent(username, password, studentId) {
   console.log("No matching student found");
   return {
     success: false,
-    message: "Invalid credentials"
+    message: 'Invalid credentials. Please check your username, student ID, and password.'
   };
 }
 
@@ -662,6 +703,125 @@ export function authenticateStaff(username, password, staffId) {
     success: false,
     message: "Invalid credentials"
   };
+}
+
+// Function to update student password
+export function updateStudentPassword(studentId, newPassword) {
+  const student = database.students.find(s => s.studentId === studentId);
+  
+  if (!student) {
+    return {
+      success: false,
+      message: "Student not found"
+    };
+  }
+
+  // Update the password
+  student.password = newPassword;
+  
+  return {
+    success: true,
+    message: "Password updated successfully"
+  };
+}
+
+// Function to update staff password
+export function updateStaffPassword(staffId, newPassword) {
+  const staff = database.staff.find(s => s.staffId === staffId);
+  
+  if (!staff) {
+    return {
+      success: false,
+      message: "Staff member not found"
+    };
+  }
+
+  // Update the password
+  staff.password = newPassword;
+  
+  return {
+    success: true,
+    message: "Password updated successfully"
+  };
+}
+
+// Function to create an appointment
+export function createAppointment(studentId, date, time, type) {
+  // Check if student exists
+  const student = database.students.find(s => s.studentId === studentId);
+  if (!student) {
+    return { success: false, message: 'Student not found' };
+  }
+
+  // Check if the time slot is already booked
+  const isTimeSlotBooked = database.appointments.some(
+    appointment => appointment.date === date && appointment.time === time
+  );
+
+  if (isTimeSlotBooked) {
+    return { success: false, message: 'This time slot is already booked' };
+  }
+
+  // Create new appointment
+  const appointment = {
+    id: Date.now().toString(),
+    studentId,
+    date,
+    time,
+    type,
+    createdAt: new Date().toISOString()
+  };
+
+  // Add to appointments array
+  database.appointments.push(appointment);
+
+  return { success: true, appointment };
+}
+
+// Function to create a notification
+export function createNotification(studentId, notification) {
+  const notificationObj = {
+    id: Date.now().toString(),
+    studentId,
+    ...notification,
+    read: false,
+    createdAt: new Date().toISOString()
+  };
+
+  database.notifications.push(notificationObj);
+  return notificationObj;
+}
+
+// Function to get student's notifications
+export function getStudentNotifications(studentId) {
+  return database.notifications
+    .filter(n => n.studentId === studentId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+// Function to mark notification as read
+export function markNotificationAsRead(notificationId) {
+  const notification = database.notifications.find(n => n.id === notificationId);
+  if (notification) {
+    notification.read = true;
+    return true;
+  }
+  return false;
+}
+
+// Function to get available time slots for a staff member
+export function getAvailableTimeSlots(staffId, date) {
+  const bookedSlots = database.appointments
+    .filter(apt => apt.staffId === staffId && apt.date === date)
+    .map(apt => apt.time);
+
+  // Define all possible time slots
+  const allSlots = [
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+  ];
+
+  return allSlots.filter(slot => !bookedSlots.includes(slot));
 }
 
 // Export the database and authentication functions

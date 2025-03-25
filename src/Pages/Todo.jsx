@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import Navbar from '../Component/Navbar';
 import Navigation from '../Component/Navigation';
@@ -125,6 +125,16 @@ const Todo = () => {
       reminder: null
     }
   ]);
+
+  // Add useEffect to handle global search
+  useEffect(() => {
+    const globalSearchQuery = localStorage.getItem('globalSearchQuery');
+    if (globalSearchQuery) {
+      setSearchQuery(globalSearchQuery);
+      // Clear the global search query after using it
+      localStorage.removeItem('globalSearchQuery');
+    }
+  }, []);
 
   const filteredTodos = todos.filter(todo => {
     const matchesSearch = todo.department.toLowerCase().includes(searchQuery.toLowerCase());
@@ -536,10 +546,13 @@ const Todo = () => {
             <div className="relative w-64">
               <input
                 type="text"
+                id="todo-search"
+                name="todo-search"
                 placeholder={translate('todo.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                aria-label="Search todos by department"
               />
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>

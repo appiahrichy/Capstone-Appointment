@@ -1,18 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../Component/Navbar";
 import Navigation from "../Component/Navigation.jsx";
-import { Link } from "react-router-dom";
+import { getAvailableTimeSlots } from '../database';
 
-const Dashboard = () => {
+const DateandTime = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(today.getDate());
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [showTimeSelection, setShowTimeSelection] = useState(false);
-  const [bookings, setBookings] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [appointmentType, setAppointmentType] = useState(null);
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -24,31 +28,85 @@ const Dashboard = () => {
   const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
 
-  useEffect(() => {
-    // Fetch booking dates and times from backend
-    const fetchBookings = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch("http://localhost:5000/api/bookings"); // Update with your API URL
-        if (!response.ok) {
-          throw new Error("Failed to fetch bookings.");
-        }
-        const data = await response.json();
-        setBookings(data);
-      } catch (err) {
-        setError(err.message);
-      }
-      setLoading(false);
-    };
+  const checkLoginAndType = useCallback(() => {
+    // Check if user is logged in
+    const studentInfo = localStorage.getItem('studentInfo');
+    if (!studentInfo) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
 
-    fetchBookings();
-  }, []);
+    // Get appointment type from location state
+    if (location.state?.type) {
+      setAppointmentType(location.state.type);
+    } else {
+      setError('Please select an appointment type first');
+    }
+  }, [location.pathname, navigate]);
+
+  useEffect(() => {
+    checkLoginAndType();
+  }, [checkLoginAndType]);
 
   const handleDateClick = (day) => {
     setSelectedDate(day);
     setShowTimeSelection(true);
     setSelectedTime(null);
+    setLoading(true);
+    setError(null);
+
+    // Format the date as YYYY-MM-DD
+    const formattedDate = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    
+    try {
+      // Get available time slots for the selected date
+      const slots = getAvailableTimeSlots('default', formattedDate);
+      setAvailableSlots(slots);
+    } catch (err) {
+      setError('Failed to fetch available time slots');
+      console.error('Error fetching time slots:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTimeSelect = (time) => {
+    setSelectedTime(time);
+  };
+
+  const handleNext = () => {
+    if (!selectedTime) {
+      setError('Please select a time');
+      return;
+    }
+
+    if (!appointmentType) {
+      setError('Please select an appointment type');
+      return;
+    }
+
+    // Get student info from localStorage
+    const studentInfo = localStorage.getItem('studentInfo');
+    if (!studentInfo) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+
+    // Format the date as YYYY-MM-DD
+    const formattedDate = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`;
+
+    // Navigate to confirmation page with appointment details
+    navigate('/confirmation', {
+      state: {
+        appointmentDetails: {
+          date: formattedDate,
+          time: selectedTime,
+          type: appointmentType,
+          staffId: 'default',
+          staffName: 'Default Staff'
+        }
+      }
+    });
   };
 
   return (
@@ -66,21 +124,41 @@ const Dashboard = () => {
           <div className="bg-white shadow-lg p-6 rounded-lg w-full sm:w-96">
             <div className="flex justify-between mb-4">
               <select
+                id="month-select"
+                name="month-select"
+                autoComplete="off"
                 className="border p-2 rounded"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
               >
                 {months.map((month, index) => (
-                  <option key={month} value={index}>{month}</option>
+                  <option 
+                    key={month} 
+                    value={index}
+                    id={`month-option-${index}`}
+                    name={`month-option-${index}`}
+                  >
+                    {month}
+                  </option>
                 ))}
               </select>
               <select
+                id="year-select"
+                name="year-select"
+                autoComplete="off"
                 className="border p-2 rounded"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
               >
                 {years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
+                  <option 
+                    key={year} 
+                    value={year}
+                    id={`year-option-${year}`}
+                    name={`year-option-${year}`}
+                  >
+                    {year}
+                  </option>
                 ))}
               </select>
             </div>
@@ -101,6 +179,9 @@ const Dashboard = () => {
                 return (
                   <button
                     key={day}
+                    id={`date-button-${day}`}
+                    name={`date-button-${day}`}
+                    autoComplete="off"
                     className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200 ${
                       selectedDate === day
                         ? "bg-blue-600 text-white scale-110 shadow-md"
@@ -128,37 +209,35 @@ const Dashboard = () => {
                 <p className="text-center text-red-600">{error}</p>
               ) : (
                 <div className="flex flex-col gap-3 max-h-72 overflow-y-auto p-2">
-                  {bookings
-                    .filter(
-                      (booking) =>
-                        booking.date === `${selectedYear}-${(selectedMonth + 1)
-                          .toString()
-                          .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
-                    )
-                    .map((booking) => (
-                      <button
-                        key={booking.time}
-                        className={`w-full py-2 border rounded-lg text-lg font-medium transition-all duration-200 ${
-                          selectedTime === booking.time
-                            ? "bg-blue-600 text-white shadow-lg scale-105"
-                            : "border-blue-400 text-blue-600 hover:bg-blue-100"
-                        }`}
-                        onClick={() => setSelectedTime(booking.time)}
-                      >
-                        {booking.time}
-                      </button>
-                    ))}
+                  {availableSlots.map((time) => (
+                    <button
+                      key={time}
+                      id={`time-button-${time.replace(':', '-')}`}
+                      name={`time-button-${time.replace(':', '-')}`}
+                      autoComplete="off"
+                      className={`w-full py-2 border rounded-lg text-lg font-medium transition-all duration-200 ${
+                        selectedTime === time
+                          ? "bg-blue-600 text-white shadow-lg scale-105"
+                          : "border-blue-400 text-blue-600 hover:bg-blue-100"
+                      }`}
+                      onClick={() => handleTimeSelect(time)}
+                    >
+                      {time}
+                    </button>
+                  ))}
                 </div>
               )}
 
-              <Link to="/Confirmation">
-                <button
-                  className="mt-4 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 w-full text-lg"
-                  disabled={!selectedTime}
-                >
-                  Next
-                </button>
-              </Link>
+              <button
+                id="next-button"
+                name="next-button"
+                autoComplete="off"
+                className="mt-4 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 w-full text-lg"
+                disabled={!selectedTime}
+                onClick={handleNext}
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
@@ -167,4 +246,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DateandTime;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaSearch, FaStar, FaRegStar, FaTrash } from 'react-icons/fa';
 import Navbar from '../Component/Navbar';
 import Navigation from '../Component/Navigation';
@@ -150,6 +150,16 @@ const Inbox = () => {
   ]);
 
   const [selectedMessages, setSelectedMessages] = useState(new Set());
+
+  // Add useEffect to handle global search
+  useEffect(() => {
+    const globalSearchQuery = localStorage.getItem('globalSearchQuery');
+    if (globalSearchQuery) {
+      setSearchQuery(globalSearchQuery);
+      // Clear the global search query after using it
+      localStorage.removeItem('globalSearchQuery');
+    }
+  }, []);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -308,10 +318,13 @@ const Inbox = () => {
               <div className="relative mb-6">
                 <input
                   type="text"
+                  id="inbox-search"
+                  name="inbox-search"
                   placeholder="Search Inbox"
                   value={searchQuery}
                   onChange={handleSearch}
                   className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                  aria-label="Search inbox messages"
                 />
                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>

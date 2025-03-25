@@ -10,13 +10,29 @@ const Settings = () => {
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('account');
   const [theme, setTheme] = useState('light');
+  const [userData, setUserData] = useState(null);
+  const [userType, setUserType] = useState(null);
 
-  // Load saved preferences from localStorage on component mount
+  // Load saved preferences and user data from localStorage on component mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     const savedLanguage = localStorage.getItem('language') || 'English';
+    const studentInfo = localStorage.getItem('studentInfo');
+    const staffInfo = localStorage.getItem('staffInfo');
+    
     setTheme(savedTheme);
     setCurrentLanguage(savedLanguage);
+    
+    if (staffInfo) {
+      setUserData(JSON.parse(staffInfo));
+      setUserType('staff');
+    } else if (studentInfo) {
+      setUserData(JSON.parse(studentInfo));
+      setUserType('student');
+    } else {
+      // Redirect to login if no user data found
+      navigate('/');
+    }
 
     // Check for section parameter in URL
     const params = new URLSearchParams(location.search);
@@ -24,7 +40,7 @@ const Settings = () => {
     if (section) {
       setActiveSection(section);
     }
-  }, [setCurrentLanguage, location.search]);
+  }, [setCurrentLanguage, location.search, navigate]);
 
   // Save preferences to localStorage whenever they change
   useEffect(() => {
@@ -47,29 +63,30 @@ const Settings = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userType');
-    localStorage.removeItem('token');
-    navigate('/');
+    // Show confirmation dialog
+    if (window.confirm('Are you sure you want to log out?')) {
+      // Clear all user-related data from localStorage
+      localStorage.removeItem('userType');
+      localStorage.removeItem('token');
+      localStorage.removeItem('studentInfo');
+      localStorage.removeItem('staffInfo');
+      navigate('/');
+    }
   };
 
   const handleChangeUser = () => {
+    // Clear all user-related data from localStorage
+    localStorage.removeItem('userType');
+    localStorage.removeItem('token');
+    localStorage.removeItem('studentInfo');
+    localStorage.removeItem('staffInfo');
     navigate('/StudentorStaff');
   };
 
   const renderAccountContent = () => {
-    // Mock user data - in a real app this would come from your backend
-    const userData = {
-      name: "Kwame O. Nkrumah",
-      email: "konkrumah@st.knust.edu.gh",
-      studentId: "304567323",
-      indexNumber: "22745587",
-      programmeStream: "Bsc. Computer Science",
-      programmeOption: "General",
-      currentYear: "Year 3",
-      gender: "Male",
-      campus: "KNUST-Kumasi",
-      status: "Continuing Ghanaian Student"
-    };
+    if (!userData) {
+      return <div>Loading...</div>;
+    }
 
     return (
       <div className="p-8">
@@ -78,42 +95,61 @@ const Settings = () => {
             {userData.name.charAt(0).toUpperCase()}
           </div>
           <h2 className="text-xl font-semibold text-gray-900">{userData.name}</h2>
-          <p className="text-sm text-gray-500">{userData.email}</p>
+          {userType === 'student' ? (
+            <p className="text-sm text-gray-500">{userData.email}</p>
+          ) : (
+            <p className="text-sm text-gray-500">{userData.staffId}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-x-16 gap-y-6 mb-12">
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.studentId')}:</p>
-            <p className="font-medium">{userData.studentId}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.indexNumber')}:</p>
-            <p className="font-medium">{userData.indexNumber}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.programmeStream')}:</p>
-            <p className="font-medium">{userData.programmeStream}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.currentYear')}:</p>
-            <p className="font-medium">{userData.currentYear}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.programmeOption')}:</p>
-            <p className="font-medium">{userData.programmeOption}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.gender')}:</p>
-            <p className="font-medium">{userData.gender}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.status')}:</p>
-            <p className="font-medium">{userData.status}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">{translate('settings.campus')}:</p>
-            <p className="font-medium">{userData.campus}</p>
-          </div>
+          {userType === 'student' ? (
+            <>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.studentId')}:</p>
+                <p className="font-medium">{userData.studentId}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.indexNumber')}:</p>
+                <p className="font-medium">{userData.indexNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.programmeStream')}:</p>
+                <p className="font-medium">{userData.programmeStream}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.currentYear')}:</p>
+                <p className="font-medium">{userData.currentYear}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.programmeOption')}:</p>
+                <p className="font-medium">{userData.programmeOption}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.gender')}:</p>
+                <p className="font-medium">{userData.gender}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.status')}:</p>
+                <p className="font-medium">{userData.status}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">{translate('settings.campus')}:</p>
+                <p className="font-medium">{userData.campus}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <p className="text-sm text-gray-600">Staff ID:</p>
+                <p className="font-medium">{userData.staffId}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Username:</p>
+                <p className="font-medium">{userData.username}</p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex space-x-4">
@@ -707,46 +743,65 @@ const Settings = () => {
               <div>
                 <div className="flex justify-center mb-8">
                   <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center text-white text-5xl font-semibold">
-                    K
+                    {userData?.name?.charAt(0).toUpperCase()}
                   </div>
                 </div>
                 <div className="max-w-2xl mx-auto">
-                  <h2 className="text-2xl font-semibold text-center mb-2">Kwame O. Nkrumah</h2>
-                  <p className="text-gray-600 text-center mb-8">konkrumah@st.knust.edu.gh</p>
+                  <h2 className="text-2xl font-semibold text-center mb-2">{userData?.name}</h2>
+                  {userType === 'student' ? (
+                    <p className="text-gray-600 text-center mb-8">{userData?.email}</p>
+                  ) : (
+                    <p className="text-gray-600 text-center mb-8">{userData?.staffId}</p>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-gray-600">Student ID:</p>
-                      <p className="font-medium">304567323</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Index Number:</p>
-                      <p className="font-medium">22745587</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Programme Stream:</p>
-                      <p className="font-medium">Bsc. Computer Science</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Current Year:</p>
-                      <p className="font-medium">Year 3</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Programme Option:</p>
-                      <p className="font-medium">General</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Gender:</p>
-                      <p className="font-medium">Male</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Status:</p>
-                      <p className="font-medium">Continuing Ghanaian Student</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Campus:</p>
-                      <p className="font-medium">KNUST-Kumasi</p>
-                    </div>
+                    {userType === 'student' ? (
+                      <>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.studentId')}:</p>
+                          <p className="font-medium">{userData?.studentId}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.indexNumber')}:</p>
+                          <p className="font-medium">{userData?.indexNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.programmeStream')}:</p>
+                          <p className="font-medium">{userData?.programmeStream}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.currentYear')}:</p>
+                          <p className="font-medium">{userData?.currentYear}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.programmeOption')}:</p>
+                          <p className="font-medium">{userData?.programmeOption}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.gender')}:</p>
+                          <p className="font-medium">{userData?.gender}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.status')}:</p>
+                          <p className="font-medium">{userData?.status}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">{translate('settings.campus')}:</p>
+                          <p className="font-medium">{userData?.campus}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-gray-600">Staff ID:</p>
+                          <p className="font-medium">{userData?.staffId}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Username:</p>
+                          <p className="font-medium">{userData?.username}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex justify-center gap-4 mt-8">

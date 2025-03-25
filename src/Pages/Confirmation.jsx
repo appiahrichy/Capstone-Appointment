@@ -1,93 +1,202 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { createAppointment } from '../database';
+import './Confirmation.css';
 import Navbar from "../Component/Navbar";
 import Navigation from "../Component/Navigation.jsx";
-import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 const Confirmation = () => {
+  const navigate = useNavigate();
   const location = useLocation();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedTime, setSelectedTime] = useState("");
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [appointmentDetails, setAppointmentDetails] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Fetch user details from API
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const response = await fetch("https://api.example.com/user/details"); // Replace with actual API
-        if (!response.ok) throw new Error("Failed to fetch data");
-        const data = await response.json();
-        setUserData(data);
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserDetails();
-
-    // Retrieve the selected time from localStorage
-    const storedTime = localStorage.getItem("selectedTime");
-    if (storedTime) {
-      setSelectedTime(storedTime);
+    // Get student info from localStorage
+    const storedStudentInfo = localStorage.getItem('studentInfo');
+    if (storedStudentInfo) {
+      setStudentInfo(JSON.parse(storedStudentInfo));
+    } else {
+      navigate('/login');
+      return;
     }
-  }, []);
+
+    // Get appointment details from location state
+    if (location.state?.appointmentDetails) {
+      setAppointmentDetails(location.state.appointmentDetails);
+    } else {
+      navigate('/dateandtime');
+      return;
+    }
+  }, [location, navigate]);
+
+  const handleSchedule = async () => {
+    if (!studentInfo || !appointmentDetails) {
+      setError('Missing required information');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = createAppointment(
+        studentInfo.studentId,
+        appointmentDetails.date,
+        appointmentDetails.time,
+        appointmentDetails.type
+      );
+
+      if (result.success) {
+        // Determine location based on appointment type
+        let location = '';
+        let notes = '';
+        let priority = 'medium';
+
+        if (appointmentDetails.type.includes('Hospital')) {
+          location = 'KNUST Hospital, Main Campus';
+          notes = 'Please bring your student ID and NHIS card. Arrive 15 minutes before your appointment time.';
+          priority = 'high';
+        } else if (appointmentDetails.type.includes('Student Clinic')) {
+          location = 'KNUST Student Clinic';
+          notes = 'Please bring your student ID and any relevant medical records. Arrive 10 minutes before your appointment time.';
+          priority = 'high';
+        } else if (appointmentDetails.type.includes('Counseling')) {
+          location = 'KNUST Counseling Center or KNUST Wellness Center';
+          notes = 'Please arrive 10 minutes before your scheduled time. Bring your student ID and any relevant documents.';
+          priority = 'medium';
+        } else if (appointmentDetails.type.includes('HOD')) {
+          location = 'Directorate of Student Affairs (DoSA) or HOD Office';
+          notes = 'Please arrive 10 minutes before your scheduled time. Bring your student ID and any relevant documents.';
+          priority = 'medium';
+        }
+
+        // Create a notification event with the correct location
+        const notificationEvent = new CustomEvent('newAppointment', {
+          detail: {
+            appointmentId: result.appointment.id,
+            date: appointmentDetails.date,
+            time: appointmentDetails.time,
+            location: location,
+            notes: notes,
+            type: appointmentDetails.type,
+            priority: priority
+          }
+        });
+
+        // Dispatch the event
+        window.dispatchEvent(notificationEvent);
+
+        // Save appointment to localStorage for history
+        const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        appointments.push({
+          ...result.appointment,
+          location: location,
+          notes: notes,
+          priority: priority
+        });
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+
+        // Navigate to confirmation page
+        navigate('/appointmentconfirmed', { 
+          state: { 
+            appointment: {
+              ...result.appointment,
+              location: location,
+              notes: notes,
+              priority: priority
+            }
+          } 
+        });
+      } else {
+        setError(result.message || 'Failed to schedule appointment');
+      }
+    } catch (err) {
+      setError('Failed to schedule appointment. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!studentInfo || !appointmentDetails) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600">Loading...</h2>
+          <p className="mt-2">Please wait while we load your information.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-black">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
-      <Navigation activePath={location.pathname} />
+      <Navigation />
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+              User Information
+            </h2>
 
-      <div className="flex flex-col items-center mt-6 px-4 sm:px-6">
-        <h2 className="text-lg font-semibold text-blue-600 border-b-2 border-blue-600 pb-1">
-          Confirm your details
-        </h2>
-
-        <div className="border border-blue-400 rounded-lg shadow-md p-6 mt-6 w-full max-w-sm sm:max-w-md">
-          <Link to="/DateandTime" className="inline-block mb-4">
-            <ArrowLeft className="text-blue-500" />
-          </Link>
-
-          {loading ? (
-            <p className="text-center text-gray-500">Loading...</p>
-          ) : (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-medium">Username</label>
-                <input
-                  type="text"
-                  value={userData?.email || "N/A"}
-                  disabled
-                  className="w-full p-2 border rounded bg-gray-200"
-                />
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {error}
               </div>
+            )}
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium">Student ID</label>
-                <input
-                  type="text"
-                  value={userData?.studentId || "N/A"}
-                  disabled
-                  className="w-full p-2 border rounded bg-gray-200"
-                />
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <div className="bg-gray-200 p-3 rounded">
+                    <p className="text-sm text-gray-600">Username</p>
+                    <p 
+                      id="username-display" 
+                      name="username-display" 
+                      className="font-medium text-gray-800"
+                    >
+                      {studentInfo.username}
+                    </p>
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <div className="bg-gray-200 p-3 rounded">
+                    <p className="text-sm text-gray-600">Student ID</p>
+                    <p 
+                      id="student-id-display" 
+                      name="student-id-display" 
+                      className="font-medium text-gray-800"
+                    >
+                      {studentInfo.studentId}
+                    </p>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <p className="text-sm">Duration: 30 min</p>
-              <p className="text-sm">Web conferencing details provided upon confirmation.</p>
-              <p className="text-sm mt-2 font-semibold text-blue-600">
-                {selectedTime ? selectedTime : "No time selected"}
-              </p>
-              <p className="text-sm">UTC Time</p>
-
-              <Link to="/AppointmentConfirmed">
-                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full text-center text-lg">
-                  Schedule Event
-                </button>
-              </Link>
-            </>
-          )}
+            <div className="mt-6 flex justify-center space-x-4">
+              <button
+                id="back-button"
+                name="back-button"
+                onClick={() => navigate(-1)}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                disabled={loading}
+              >
+                Back
+              </button>
+              <button
+                id="schedule-button"
+                name="schedule-button"
+                onClick={handleSchedule}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+                disabled={loading}
+              >
+                {loading ? 'Scheduling...' : 'Schedule Event'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

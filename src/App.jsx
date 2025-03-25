@@ -11,7 +11,7 @@ import Studentclinicapppage from './Pages/Studentclinicapp';
 import AcademicAdvisorapppage from './Pages/AcademicAdvisorapp';
 import DateandTimepage from './Pages/DateandTime';
 import Confirmationpage from './Pages/Confirmation';
-import AppointmentConfirmedpage from './Pages/AppointmentConfirmed';
+import AppointmentConfirmed from './Pages/AppointmentConfirmed';
 import Navbarpage from './Component/Navbar';
 import Navigationpage from './Component/Navigation.jsx';
 import Notificationspage from './Pages/Notifications';
@@ -20,6 +20,10 @@ import Hodapppage from './Pages/Hodapp';
 import Testimonialpage from './Pages/Testimonial';
 import Settingspage from './Pages/Settings';
 import Todopage from './Pages/Todo';
+import ForgotPassword from './Pages/ForgotPassword';
+import StaffForgotPassword from './Pages/StaffForgotPassword';
+import CreateTicket from './Pages/CreateTicket';
+import AdminDashboard from './Pages/AdminDashboard';
 import { LanguageProvider } from './context/LanguageProvider';
 import './styles/theme.css';
 import ViewBookingpage from './Pages/ViewBooking';
@@ -31,7 +35,11 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<StudentLoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/staff-forgot-password" element={<StaffForgotPassword />} />
+            <Route path="/create-ticket" element={<CreateTicket />} />
             <Route path="/stafflogin" element={<StaffloginPage />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/studentorstaff" element={<StudentorStaffPage />} />
             <Route path="/dashboard" element={<Dashboardpage />} />
             <Route path="/studentdashboard" element={<Studentdashboardpage />} />
@@ -41,7 +49,7 @@ const App = () => {
             <Route path="/academicadvisorapp" element={<AcademicAdvisorapppage />} />
             <Route path="/dateandtime" element={<DateandTimepage />} />
             <Route path="/confirmation" element={<Confirmationpage />} />
-            <Route path="/appointmentconfirmed" element={<AppointmentConfirmedpage />} />
+            <Route path="/appointmentconfirmed" element={<AppointmentConfirmed />} />
             <Route path="/navbar" element={<Navbarpage />} />
             <Route path="/navigation" element={<Navigationpage />} />
             <Route path="/notifications" element={<Notificationspage />} />
