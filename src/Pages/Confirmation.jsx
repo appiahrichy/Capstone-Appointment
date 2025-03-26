@@ -56,7 +56,7 @@ const Confirmation = () => {
         let priority = 'medium';
 
         if (appointmentDetails.type.includes('Hospital')) {
-          location = 'KNUST Hospital, Main Campus';
+          location = 'KNUST Hospital';
           notes = 'Please bring your student ID and NHIS card. Arrive 15 minutes before your appointment time.';
           priority = 'high';
         } else if (appointmentDetails.type.includes('Student Clinic')) {
@@ -64,12 +64,12 @@ const Confirmation = () => {
           notes = 'Please bring your student ID and any relevant medical records. Arrive 10 minutes before your appointment time.';
           priority = 'high';
         } else if (appointmentDetails.type.includes('Counseling')) {
-          location = 'KNUST Counseling Center or KNUST Wellness Center';
+          location = appointmentDetails.type.includes('department') ? 'Department Counseling Room' : 'J. Harper Building';
           notes = 'Please arrive 10 minutes before your scheduled time. Bring your student ID and any relevant documents.';
           priority = 'medium';
-        } else if (appointmentDetails.type.includes('HOD')) {
-          location = 'Directorate of Student Affairs (DoSA) or HOD Office';
-          notes = 'Please arrive 10 minutes before your scheduled time. Bring your student ID and any relevant documents.';
+        } else if (appointmentDetails.type.includes('Academic')) {
+          location = "HOD's Office";
+          notes = 'Please arrive 10 minutes before your scheduled time. Bring your student ID and academic records.';
           priority = 'medium';
         }
 
@@ -79,11 +79,12 @@ const Confirmation = () => {
         // Check for existing notifications and todos
         const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
         const existingTodos = JSON.parse(localStorage.getItem('todos') || '[]');
+        const existingMessages = JSON.parse(localStorage.getItem('messages') || '[]');
         const processedAppointments = new Set(
           JSON.parse(localStorage.getItem('processedAppointments') || '[]')
         );
 
-        // Only create notification and todo if this appointment hasn't been processed
+        // Only create notification, todo, and message if this appointment hasn't been processed
         if (!processedAppointments.has(appointmentKey)) {
           // Create notification event with complete location information
           const notificationEvent = new CustomEvent('newAppointment', {
@@ -112,11 +113,28 @@ const Confirmation = () => {
             notes: notes,
             reminder: null,
             appointmentId: result.appointment.id,
-            location: location
+            location: location,
+            studentId: studentInfo.studentId
           };
           
           const todos = [...existingTodos, newTodo];
           localStorage.setItem('todos', JSON.stringify(todos));
+
+          // Create and add message
+          const newMessage = {
+            id: result.appointment.id,
+            department: appointmentDetails.type,
+            subject: `Appointment Confirmation - ${appointmentDetails.type}`,
+            content: `Dear ${studentInfo.name},\n\nYour appointment has been scheduled successfully.\n\nDetails:\nDate: ${appointmentDetails.date}\nTime: ${appointmentDetails.time}\nLocation: ${location}\n\n${notes}\n\nBest regards,\n${appointmentDetails.type}`,
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            starred: false,
+            status: 'inbox',
+            senderId: 'system',
+            recipientId: studentInfo.studentId
+          };
+
+          const messages = [...existingMessages, newMessage];
+          localStorage.setItem('messages', JSON.stringify(messages));
 
           // Mark this appointment as processed
           processedAppointments.add(appointmentKey);
@@ -134,7 +152,8 @@ const Confirmation = () => {
             ...result.appointment,
             location: location,
             notes: notes,
-            priority: priority
+            priority: priority,
+            staffName: appointmentDetails.staffName
           });
           localStorage.setItem('appointments', JSON.stringify(appointments));
         }
@@ -146,7 +165,8 @@ const Confirmation = () => {
               ...result.appointment,
               location: location,
               notes: notes,
-              priority: priority
+              priority: priority,
+              staffName: appointmentDetails.staffName
             }
           } 
         });

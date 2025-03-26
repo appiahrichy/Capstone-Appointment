@@ -22,6 +22,10 @@ const NotificationPage = () => {
   const [selectedPriority, setSelectedPriority] = useState('all'); // 'all', 'high', 'medium', 'low'
   const [sortBy, setSortBy] = useState('date'); // 'date', 'priority'
 
+  // Constants for notification limits
+  const MIN_NOTIFICATIONS = 0;
+  const MAX_NOTIFICATIONS = 49;
+
   // Memoized function to get location based on type
   const getLocation = useCallback((type) => {
     // Check if the type includes any of the known types
@@ -33,13 +37,32 @@ const NotificationPage = () => {
     return "Not specified";
   }, []);
 
+  // Function to maintain notification limits
+  const maintainNotificationLimits = useCallback((notifications) => {
+    if (notifications.length > MAX_NOTIFICATIONS) {
+      // If we have more than maximum, keep only the most recent ones
+      // Prioritize keeping high-priority notifications and unread notifications
+      const sortedByPriority = notifications.sort((a, b) => {
+        // First sort by read status (unread first)
+        if (a.read !== b.read) {
+          return a.read ? 1 : -1;
+        }
+        // Then by priority
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
+      return sortedByPriority.slice(0, MAX_NOTIFICATIONS);
+    }
+    
+    return notifications;
+  }, []);
+
   // Handle new appointments
   useEffect(() => {
     const handleNewAppointment = (event) => {
       console.log('Received new appointment event:', event.detail);
       const { appointmentId, date, time, location, notes, type, priority } = event.detail;
       
-      // Check if we've already processed this appointment
       if (!processedAppointmentIds.has(appointmentId)) {
         const newNotification = {
           id: generateUniqueId(appointmentId, 'appointment'),
@@ -58,7 +81,7 @@ const NotificationPage = () => {
         processedAppointmentIds.add(appointmentId);
         
         setNotifications(prev => {
-          const updated = [newNotification, ...prev];
+          const updated = maintainNotificationLimits([newNotification, ...prev]);
           localStorage.setItem('notifications', JSON.stringify(updated));
           return updated;
         });
@@ -67,7 +90,7 @@ const NotificationPage = () => {
 
     window.addEventListener('newAppointment', handleNewAppointment);
     return () => window.removeEventListener('newAppointment', handleNewAppointment);
-  }, [processedAppointmentIds]);
+  }, [processedAppointmentIds, maintainNotificationLimits]);
 
   // Check for upcoming appointments
   useEffect(() => {
@@ -104,7 +127,7 @@ const NotificationPage = () => {
 
       if (newReminders.length > 0) {
         setNotifications(prev => {
-          const updated = [...newReminders, ...prev];
+          const updated = maintainNotificationLimits([...newReminders, ...prev]);
           localStorage.setItem('notifications', JSON.stringify(updated));
           return updated;
         });
@@ -114,7 +137,7 @@ const NotificationPage = () => {
     const interval = setInterval(checkUpcomingAppointments, 60 * 60 * 1000);
     checkUpcomingAppointments();
     return () => clearInterval(interval);
-  }, [notifications, processedAppointmentIds]);
+  }, [notifications, processedAppointmentIds, maintainNotificationLimits]);
 
   // Load notifications and appointments
   useEffect(() => {
@@ -127,7 +150,7 @@ const NotificationPage = () => {
         parsedNotifications.forEach(notification => {
           processedAppointmentIds.add(notification.appointmentId);
         });
-        setNotifications(parsedNotifications);
+        setNotifications(maintainNotificationLimits(parsedNotifications));
       }
 
       // Load appointments and create notifications only for new ones
@@ -154,7 +177,7 @@ const NotificationPage = () => {
         
         if (newAppointmentNotifications.length > 0) {
           setNotifications(prev => {
-            const updated = [...newAppointmentNotifications, ...prev];
+            const updated = maintainNotificationLimits([...newAppointmentNotifications, ...prev]);
             localStorage.setItem('notifications', JSON.stringify(updated));
             return updated;
           });
@@ -163,7 +186,7 @@ const NotificationPage = () => {
     };
 
     loadData();
-  }, [getLocation, processedAppointmentIds]);
+  }, [getLocation, processedAppointmentIds, maintainNotificationLimits]);
 
   // Memoized notification actions
   const dismissNotification = useCallback((id) => {
@@ -329,6 +352,23 @@ const NotificationPage = () => {
             <div className="text-center py-8">
               <AiOutlineBell className="mx-auto text-6xl text-gray-400 mb-4" />
               <p className="text-gray-500 text-lg">No notifications found</p>
+              <p className="text-gray-400 text-sm mt-2">
+                You'll receive notifications when:
+                <ul className="mt-2 text-left max-w-md mx-auto">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    Creating new appointments
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    Receiving appointment reminders
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Getting appointment updates
+                  </li>
+                </ul>
+              </p>
             </div>
           ) : (
             <div className="space-y-4">

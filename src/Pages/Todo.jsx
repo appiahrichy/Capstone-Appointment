@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUser, FaBell, FaShare, FaEdit, FaTrash, FaCheck } from 'react-icons/fa';
 import Navbar from '../Component/Navbar';
 import Navigation from '../Component/Navigation';
 import { useLanguage } from '../context/useLanguage';
@@ -23,127 +23,54 @@ const Todo = () => {
     note: '',
     email: '',
   });
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      department: 'Counseling Department',
-      duration: '30 Minute Meeting',
-      date: 'Thursday, 9/20/2023 - 9:30am',
-      status: 'pending',
-      bookingPage: '/counseling-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 2,
-      department: 'Hospital Department',
-      duration: '45 Minute Checkup',
-      date: 'Friday, 9/21/2023 - 10:00am',
-      status: 'cancelled',
-      bookingPage: '/hospital-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 3,
-      department: 'Academic Department',
-      duration: '1 Hour Consultation',
-      date: 'Monday, 9/24/2023 - 2:00pm',
-      status: 'completed',
-      bookingPage: '/academic-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 4,
-      department: 'Career Counseling',
-      duration: '45 Minute Session',
-      date: 'Tuesday, 9/25/2023 - 11:30am',
-      status: 'pending',
-      bookingPage: '/career-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 5,
-      department: 'Dental Clinic',
-      duration: '1 Hour Checkup',
-      date: 'Wednesday, 9/26/2023 - 3:15pm',
-      status: 'pending',
-      bookingPage: '/dental-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 6,
-      department: 'Mental Health Services',
-      duration: '50 Minute Session',
-      date: 'Thursday, 9/27/2023 - 1:00pm',
-      status: 'cancelled',
-      bookingPage: '/mental-health-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 7,
-      department: 'Academic Advising',
-      duration: '30 Minute Meeting',
-      date: 'Friday, 9/28/2023 - 9:00am',
-      status: 'completed',
-      bookingPage: '/academic-advising-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 8,
-      department: 'Physiotherapy',
-      duration: '45 Minute Session',
-      date: 'Monday, 10/1/2023 - 4:00pm',
-      status: 'pending',
-      bookingPage: '/physiotherapy-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 9,
-      department: 'Language Support',
-      duration: '1 Hour Tutorial',
-      date: 'Tuesday, 10/2/2023 - 2:30pm',
-      status: 'completed',
-      bookingPage: '/language-support-booking',
-      notes: '',
-      reminder: null
-    },
-    {
-      id: 10,
-      department: 'Study Skills Workshop',
-      duration: '2 Hour Workshop',
-      date: 'Wednesday, 10/3/2023 - 10:00am',
-      status: 'pending',
-      bookingPage: '/study-skills-booking',
-      notes: '',
-      reminder: null
+  const [todos, setTodos] = useState([]);
+  const [sortBy, setSortBy] = useState('date');
+  const [viewMode, setViewMode] = useState('list');
+
+  // Fetch todos from localStorage on component mount
+  useEffect(() => {
+    const studentInfo = JSON.parse(localStorage.getItem('studentInfo'));
+    if (!studentInfo) {
+      navigate('/login');
+      return;
     }
-  ]);
+
+    const allTodos = JSON.parse(localStorage.getItem('todos') || '[]');
+    // Filter todos for the current user
+    const userTodos = allTodos.filter(todo => todo.studentId === studentInfo.studentId);
+    setTodos(userTodos);
+  }, [navigate]);
 
   // Add useEffect to handle global search
   useEffect(() => {
     const globalSearchQuery = localStorage.getItem('globalSearchQuery');
     if (globalSearchQuery) {
       setSearchQuery(globalSearchQuery);
-      // Clear the global search query after using it
       localStorage.removeItem('globalSearchQuery');
     }
   }, []);
 
-  const filteredTodos = todos.filter(todo => {
-    const matchesSearch = todo.department.toLowerCase().includes(searchQuery.toLowerCase());
-    if (filter === 'all') return matchesSearch;
-    if (filter === 'pending') return todo.status === 'pending' && matchesSearch;
-    if (filter === 'cancelled') return todo.status === 'cancelled' && matchesSearch;
-    if (filter === 'completed') return todo.status === 'completed' && matchesSearch;
-    return matchesSearch;
-  });
+  const filteredTodos = todos
+    .filter(todo => {
+      const matchesSearch = todo.department.toLowerCase().includes(searchQuery.toLowerCase());
+      if (filter === 'all') return matchesSearch;
+      if (filter === 'pending') return todo.status === 'pending' && matchesSearch;
+      if (filter === 'cancelled') return todo.status === 'cancelled' && matchesSearch;
+      if (filter === 'completed') return todo.status === 'completed' && matchesSearch;
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'date') {
+        return new Date(a.date) - new Date(b.date);
+      }
+      if (sortBy === 'department') {
+        return a.department.localeCompare(b.department);
+      }
+      if (sortBy === 'status') {
+        return a.status.localeCompare(b.status);
+      }
+      return 0;
+    });
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -185,7 +112,7 @@ const Todo = () => {
 
   const handleSaveEdit = () => {
     if (selectedTodo) {
-      setTodos(todos.map(todo =>
+      const updatedTodos = todos.map(todo =>
         todo.id === selectedTodo.id
           ? {
               ...todo,
@@ -194,7 +121,9 @@ const Todo = () => {
               date: editFormData.date,
             }
           : todo
-      ));
+      );
+      setTodos(updatedTodos);
+      localStorage.setItem('todos', JSON.stringify(updatedTodos));
       setShowEditModal(false);
       setSelectedTodo(null);
       setEditFormData({
@@ -230,13 +159,25 @@ const Todo = () => {
 
   const handleCancel = (todoId) => {
     if (window.confirm('Are you sure you want to cancel this appointment?')) {
-      setTodos(todos.map(todo => 
+      const updatedTodos = todos.map(todo => 
         todo.id === todoId 
           ? { ...todo, status: 'cancelled' }
           : todo
-      ));
+      );
+      setTodos(updatedTodos);
+      localStorage.setItem('todos', JSON.stringify(updatedTodos));
       setActiveSettings(null);
     }
+  };
+
+  const handleComplete = (todoId) => {
+    const updatedTodos = todos.map(todo => 
+      todo.id === todoId 
+        ? { ...todo, status: 'completed' }
+        : todo
+    );
+    setTodos(updatedTodos);
+    localStorage.setItem('todos', JSON.stringify(updatedTodos));
   };
 
   const saveNote = (note) => {
@@ -247,58 +188,46 @@ const Todo = () => {
           return;
         }
 
-        setTodos(todos.map(todo =>
+        const updatedTodos = todos.map(todo =>
           todo.id === selectedTodo.id
-            ? { ...todo, notes: note.trim() }
+            ? { ...todo, notes: note }
             : todo
-        ));
-        alert('Note saved successfully!');
+        );
+        setTodos(updatedTodos);
+        localStorage.setItem('todos', JSON.stringify(updatedTodos));
         setShowNoteModal(false);
         setSelectedTodo(null);
         setEditFormData({
           ...editFormData,
           note: ''
         });
-      } catch {
-        alert('Error saving note. Please try again.');
+      } catch (error) {
+        console.error('Error saving note:', error);
+        alert('Failed to save note. Please try again.');
       }
     }
   };
 
   const saveReminder = (reminderDate) => {
-    if (selectedTodo && reminderDate) {
+    if (selectedTodo) {
       try {
-        // Validate the date
-        const reminder = new Date(reminderDate);
-        if (isNaN(reminder.getTime())) {
-          alert('Please enter a valid date and time');
-          return;
-        }
-
-        // Only save if the date is in the future
-        if (reminder < new Date()) {
-          alert('Please select a future date and time');
-          return;
-        }
-
-        setTodos(todos.map(todo =>
+        const updatedTodos = todos.map(todo =>
           todo.id === selectedTodo.id
-            ? { ...todo, reminder: reminder.toISOString() }
+            ? { ...todo, reminder: reminderDate }
             : todo
-        ));
-        // Show success message
-        alert('Reminder set successfully!');
+        );
+        setTodos(updatedTodos);
+        localStorage.setItem('todos', JSON.stringify(updatedTodos));
         setShowReminderModal(false);
         setSelectedTodo(null);
         setEditFormData({
           ...editFormData,
-          reminder: ''
+          reminder: null
         });
-      } catch {
-        alert('Error setting reminder. Please try again.');
+      } catch (error) {
+        console.error('Error saving reminder:', error);
+        alert('Failed to save reminder. Please try again.');
       }
-    } else {
-      alert('Please select a date and time for the reminder');
     }
   };
 
@@ -346,7 +275,7 @@ const Todo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100" onClick={() => setActiveSettings(null)}>
+    <div className="min-h-screen bg-gray-50" onClick={() => setActiveSettings(null)}>
       <Navbar />
       <Navigation />
 
@@ -480,7 +409,7 @@ const Todo = () => {
                   setShowReminderModal(false);
                   setEditFormData({
                     ...editFormData,
-                    reminder: ''
+                    reminder: null
                   });
                 }}
               >
@@ -542,54 +471,90 @@ const Todo = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-6">
           {/* Search and Filter Section */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="relative w-64">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div className="relative flex-1 md:max-w-md">
               <input
                 type="text"
-                id="todo-search"
-                name="todo-search"
                 placeholder={translate('todo.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                aria-label="Search todos by department"
               />
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg ${filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            
+            <div className="flex flex-wrap gap-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
               >
-                {translate('todo.all')}
-              </button>
-              <button
-                onClick={() => setFilter('pending')}
-                className={`px-4 py-2 rounded-lg ${filter === 'pending' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-              >
-                {translate('todo.pending')}
-              </button>
-              <button
-                onClick={() => setFilter('cancelled')}
-                className={`px-4 py-2 rounded-lg ${filter === 'cancelled' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-              >
-                {translate('todo.cancelled')}
-              </button>
-              <button
-                onClick={() => setFilter('completed')}
-                className={`px-4 py-2 rounded-lg ${filter === 'completed' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-              >
-                {translate('todo.completed')}
-              </button>
+                <option value="date">Sort by Date</option>
+                <option value="department">Sort by Department</option>
+                <option value="status">Sort by Status</option>
+              </select>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-4 py-2 rounded-lg ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  List View
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-4 py-2 rounded-lg ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  Grid View
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Todo List */}
-          <div className="space-y-4">
+          {/* Filter Buttons */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              {translate('todo.all')}
+            </button>
+            <button
+              onClick={() => setFilter('pending')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                filter === 'pending' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              {translate('todo.pending')}
+            </button>
+            <button
+              onClick={() => setFilter('cancelled')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                filter === 'cancelled' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              {translate('todo.cancelled')}
+            </button>
+            <button
+              onClick={() => setFilter('completed')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                filter === 'completed' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              {translate('todo.completed')}
+            </button>
+          </div>
+
+          {/* Todo List/Grid */}
+          <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}`}>
             {filteredTodos.map(todo => (
               <div
                 key={todo.id}
-                className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:scale-[1.02] group"
+                className={`bg-white rounded-lg p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:scale-[1.02] group ${
+                  viewMode === 'grid' ? 'flex flex-col' : ''
+                }`}
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -614,47 +579,59 @@ const Todo = () => {
                         <div className="py-1">
                           <button
                             onClick={() => handleEdit(todo)}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center"
                           >
-                            Edit
+                            <FaEdit className="mr-2" /> Edit
                           </button>
                           <button
                             onClick={() => handleAddNote(todo)}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center"
                           >
-                            Add Note
+                            <FaBell className="mr-2" /> Add Note
                           </button>
                           <button
                             onClick={() => handleSetReminder(todo)}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center"
                           >
-                            Set Reminder
+                            <FaClock className="mr-2" /> Set Reminder
                           </button>
                           <button
-                            onClick={() => handleCancel(todo.id)}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                            onClick={() => handleShare(todo)}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center"
                           >
-                            Cancel Appointment
+                            <FaShare className="mr-2" /> Share
+                          </button>
+                          {todo.status !== 'completed' && (
+                            <button
+                              onClick={() => handleComplete(todo.id)}
+                              className="block w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center"
+                            >
+                              <FaCheck className="mr-2" /> Mark as Complete
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleCancel(todo.id)}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                          >
+                            <FaTrash className="mr-2" /> Cancel Appointment
                           </button>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
+
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <FaCalendarAlt className="w-4 h-4" />
                     <span className="group-hover:text-gray-600 transition-colors">{todo.date}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <FaClock className="w-4 h-4" />
                     <span className="group-hover:text-gray-600 transition-colors">{todo.time}</span>
                   </div>
                 </div>
+
                 <div className="flex items-center justify-between">
                   <span className={`px-3 py-1 rounded-full text-sm capitalize transition-all duration-300 ${getStatusClass(todo.status)}`}>
                     {translate(`todo.status.${todo.status}`)}
@@ -664,23 +641,8 @@ const Todo = () => {
                       onClick={() => handleViewBooking(todo)}
                       className="text-blue-600 hover:text-blue-800 text-sm transition-colors duration-200 hover:underline flex items-center gap-1"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
+                      <FaUser className="w-4 h-4" />
                       {translate('todo.viewBooking')}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleShare(todo);
-                      }}
-                      className="text-gray-400 hover:text-blue-600 transition-colors duration-200 flex items-center space-x-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                      </svg>
-                      <span>{translate('todo.share')}</span>
                     </button>
                   </div>
                 </div>
