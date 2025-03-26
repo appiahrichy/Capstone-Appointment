@@ -781,7 +781,7 @@ export function createAppointment(studentId, date, time, type) {
 // Function to create a notification
 export function createNotification(studentId, notification) {
   const notificationObj = {
-    id: Date.now().toString(),
+    id: `${Date.now()}-${notification.type}-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     studentId,
     ...notification,
     read: false,

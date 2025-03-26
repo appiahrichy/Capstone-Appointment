@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createAppointment } from '../database';
+import { generateUniqueId } from '../utils/idGenerator';
 import './Confirmation.css';
 import Navbar from "../Component/Navbar";
 import Navigation from "../Component/Navigation.jsx";
@@ -12,6 +13,7 @@ const Confirmation = () => {
   const [appointmentDetails, setAppointmentDetails] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notificationCounter, setNotificationCounter] = useState(0);
 
   useEffect(() => {
     // Get student info from localStorage
@@ -71,33 +73,73 @@ const Confirmation = () => {
           priority = 'medium';
         }
 
-        // Create a notification event with the correct location
-        const notificationEvent = new CustomEvent('newAppointment', {
-          detail: {
+        // Create a unique key for this appointment
+        const appointmentKey = generateUniqueId(result.appointment.id, appointmentDetails.type);
+
+        // Check for existing notifications and todos
+        const existingNotifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const existingTodos = JSON.parse(localStorage.getItem('todos') || '[]');
+        const processedAppointments = new Set(
+          JSON.parse(localStorage.getItem('processedAppointments') || '[]')
+        );
+
+        // Only create notification and todo if this appointment hasn't been processed
+        if (!processedAppointments.has(appointmentKey)) {
+          // Create notification event with complete location information
+          const notificationEvent = new CustomEvent('newAppointment', {
+            detail: {
+              appointmentId: result.appointment.id,
+              date: appointmentDetails.date,
+              time: appointmentDetails.time,
+              location: location,
+              notes: notes,
+              type: appointmentDetails.type,
+              priority: priority
+            }
+          });
+
+          // Dispatch the event
+          window.dispatchEvent(notificationEvent);
+
+          // Add to todos with complete location information
+          const newTodo = {
+            id: result.appointment.id,
+            department: appointmentDetails.type,
+            duration: '30 Minute Meeting',
+            date: `${appointmentDetails.date} - ${appointmentDetails.time}`,
+            status: 'pending',
+            bookingPage: `/${appointmentDetails.type.toLowerCase()}-booking`,
+            notes: notes,
+            reminder: null,
             appointmentId: result.appointment.id,
-            date: appointmentDetails.date,
-            time: appointmentDetails.time,
+            location: location
+          };
+          
+          const todos = [...existingTodos, newTodo];
+          localStorage.setItem('todos', JSON.stringify(todos));
+
+          // Mark this appointment as processed
+          processedAppointments.add(appointmentKey);
+          localStorage.setItem('processedAppointments', JSON.stringify([...processedAppointments]));
+        }
+
+        // Save appointment to localStorage for history with complete location information
+        const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+        const isDuplicateAppointment = appointments.some(
+          appointment => appointment.id === result.appointment.id
+        );
+
+        if (!isDuplicateAppointment) {
+          appointments.push({
+            ...result.appointment,
             location: location,
             notes: notes,
-            type: appointmentDetails.type,
             priority: priority
-          }
-        });
+          });
+          localStorage.setItem('appointments', JSON.stringify(appointments));
+        }
 
-        // Dispatch the event
-        window.dispatchEvent(notificationEvent);
-
-        // Save appointment to localStorage for history
-        const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-        appointments.push({
-          ...result.appointment,
-          location: location,
-          notes: notes,
-          priority: priority
-        });
-        localStorage.setItem('appointments', JSON.stringify(appointments));
-
-        // Navigate to confirmation page
+        // Navigate to confirmation page with complete location information
         navigate('/appointmentconfirmed', { 
           state: { 
             appointment: {

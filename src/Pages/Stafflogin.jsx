@@ -50,6 +50,7 @@ const StaffLoginPage = () => {
         // Store complete staff data and user type in localStorage
         localStorage.setItem('staffInfo', JSON.stringify(result.staff));
         localStorage.setItem('userType', 'staff');
+        // Navigate to staff dashboard
         navigate("/dashboard");
       } else {
         console.log("Login failed:", result.message);

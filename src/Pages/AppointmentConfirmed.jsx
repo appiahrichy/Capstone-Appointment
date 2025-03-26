@@ -8,6 +8,7 @@ const AppointmentConfirmed = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const appointment = location.state?.appointment;
+  const userType = localStorage.getItem('userType'); // Get user type from localStorage
 
   if (!appointment) {
     return (
@@ -19,6 +20,16 @@ const AppointmentConfirmed = () => {
       </div>
     );
   }
+
+  const handleDashboardNavigation = () => {
+    if (userType === 'student') {
+      navigate('/studentdashboard');
+    } else if (userType === 'staff') {
+      navigate('/dashboard');
+    } else {
+      navigate('/studentorstaff');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -78,7 +89,7 @@ const AppointmentConfirmed = () => {
 
           <div className="flex justify-center">
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={handleDashboardNavigation}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Return to Dashboard

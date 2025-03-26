@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../Component/Navbar";
 import Navigation from "../Component/Navigation.jsx";
@@ -17,50 +17,51 @@ const DateandTime = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [appointmentType, setAppointmentType] = useState(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const months = [
+  // Memoize static data
+  const months = useMemo(() => [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
-  ];
+  ], []);
 
-  const years = ["2024", "2025", "2026", "2027", "2028"];
+  const years = useMemo(() => ["2024", "2025", "2026", "2027", "2028"], []);
 
-  const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
+  const getDaysInMonth = useCallback((month, year) => new Date(year, month + 1, 0).getDate(), []);
+  const getFirstDayOfMonth = useCallback((month, year) => new Date(year, month, 1).getDay(), []);
 
   const checkLoginAndType = useCallback(() => {
-    // Check if user is logged in
     const studentInfo = localStorage.getItem('studentInfo');
     if (!studentInfo) {
       navigate('/login', { state: { from: location.pathname } });
       return;
     }
 
-    // Get appointment type from location state
     if (location.state?.type) {
       setAppointmentType(location.state.type);
     } else {
       setError('Please select an appointment type first');
+      navigate(-1);
     }
-  }, [location.pathname, navigate]);
+  }, [location.state, navigate]);
 
   useEffect(() => {
     checkLoginAndType();
   }, [checkLoginAndType]);
 
-  const handleDateClick = (day) => {
+  const handleDateClick = useCallback(async (day) => {
+    if (isNavigating) return;
+    
     setSelectedDate(day);
     setShowTimeSelection(true);
     setSelectedTime(null);
     setLoading(true);
     setError(null);
 
-    // Format the date as YYYY-MM-DD
     const formattedDate = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     
     try {
-      // Get available time slots for the selected date
-      const slots = getAvailableTimeSlots('default', formattedDate);
+      const slots = await getAvailableTimeSlots('default', formattedDate);
       setAvailableSlots(slots);
     } catch (err) {
       setError('Failed to fetch available time slots');
@@ -68,13 +69,15 @@ const DateandTime = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedYear, selectedMonth, isNavigating]);
 
-  const handleTimeSelect = (time) => {
+  const handleTimeSelect = useCallback((time) => {
     setSelectedTime(time);
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
+    if (isNavigating) return;
+    
     if (!selectedTime) {
       setError('Please select a time');
       return;
@@ -85,17 +88,15 @@ const DateandTime = () => {
       return;
     }
 
-    // Get student info from localStorage
     const studentInfo = localStorage.getItem('studentInfo');
     if (!studentInfo) {
       navigate('/login', { state: { from: location.pathname } });
       return;
     }
 
-    // Format the date as YYYY-MM-DD
+    setIsNavigating(true);
     const formattedDate = `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`;
 
-    // Navigate to confirmation page with appointment details
     navigate('/confirmation', {
       state: {
         appointmentDetails: {
@@ -105,9 +106,41 @@ const DateandTime = () => {
           staffId: 'default',
           staffName: 'Default Staff'
         }
-      }
+      },
+      replace: true
     });
-  };
+  }, [selectedTime, appointmentType, selectedYear, selectedMonth, selectedDate, navigate, location.pathname, isNavigating]);
+
+  // Memoize the calendar grid
+  const calendarGrid = useMemo(() => {
+    const days = Array(getDaysInMonth(selectedMonth, selectedYear)).fill().map((_, i) => i + 1);
+    const emptyDays = Array(getFirstDayOfMonth(selectedMonth, selectedYear)).fill(null);
+    
+    return (
+      <div className="grid grid-cols-7 gap-2">
+        {emptyDays.map((_, i) => (
+          <div key={`empty-${i}`} className="w-10 h-10"></div>
+        ))}
+        {days.map((day) => (
+          <button
+            key={day}
+            id={`date-button-${day}`}
+            name={`date-button-${day}`}
+            autoComplete="off"
+            className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200 ${
+              selectedDate === day
+                ? "bg-blue-600 text-white scale-110 shadow-md"
+                : "bg-gray-200 text-gray-800 hover:bg-blue-400 hover:text-white"
+            }`}
+            onClick={() => handleDateClick(day)}
+            disabled={isNavigating}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+    );
+  }, [selectedMonth, selectedYear, selectedDate, handleDateClick, isNavigating]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -130,6 +163,7 @@ const DateandTime = () => {
                 className="border p-2 rounded"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                disabled={isNavigating}
               >
                 {months.map((month, index) => (
                   <option 
@@ -149,6 +183,7 @@ const DateandTime = () => {
                 className="border p-2 rounded"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
+                disabled={isNavigating}
               >
                 {years.map((year) => (
                   <option 
@@ -170,30 +205,7 @@ const DateandTime = () => {
                 <div key={day}>{day}</div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-2">
-              {Array(getFirstDayOfMonth(selectedMonth, selectedYear))
-                .fill(null)
-                .map((_, i) => <div key={`empty-${i}`} className="w-10 h-10"></div>)}
-              {Array(getDaysInMonth(selectedMonth, selectedYear)).fill().map((_, i) => {
-                const day = i + 1;
-                return (
-                  <button
-                    key={day}
-                    id={`date-button-${day}`}
-                    name={`date-button-${day}`}
-                    autoComplete="off"
-                    className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-medium transition-all duration-200 ${
-                      selectedDate === day
-                        ? "bg-blue-600 text-white scale-110 shadow-md"
-                        : "bg-gray-200 text-gray-800 hover:bg-blue-400 hover:text-white"
-                    }`}
-                    onClick={() => handleDateClick(day)}
-                  >
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
+            {calendarGrid}
           </div>
 
           {/* Time Selection Section */}
@@ -221,6 +233,7 @@ const DateandTime = () => {
                           : "border-blue-400 text-blue-600 hover:bg-blue-100"
                       }`}
                       onClick={() => handleTimeSelect(time)}
+                      disabled={isNavigating}
                     >
                       {time}
                     </button>
@@ -232,11 +245,11 @@ const DateandTime = () => {
                 id="next-button"
                 name="next-button"
                 autoComplete="off"
-                className="mt-4 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 w-full text-lg"
-                disabled={!selectedTime}
+                className="mt-4 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 w-full text-lg transition-all duration-200"
+                disabled={!selectedTime || isNavigating}
                 onClick={handleNext}
               >
-                Next
+                {isNavigating ? 'Processing...' : 'Next'}
               </button>
             </div>
           )}

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { AiOutlineBell, AiOutlineCheckCircle, AiOutlineDelete, AiOutlineStar } from "react-icons/ai";
+import { AiOutlineBell, AiOutlineCheckCircle, AiOutlineDelete, AiOutlineStar, AiOutlineFilter, AiOutlineSearch } from "react-icons/ai";
 import Navbar from "../Component/Navbar";
 import Navigation from "../Component/Navigation";
+import { generateUniqueId } from "../utils/idGenerator";
 
 // Constants for better maintainability
 const LOCATION_MAPPING = {
@@ -15,87 +16,88 @@ const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [tempNotifications, setTempNotifications] = useState(null);
   const [undoTimeout, setUndoTimeout] = useState(null);
+  const [processedAppointmentIds] = useState(new Set());
+  const [filter, setFilter] = useState('all'); // 'all', 'unread', 'read'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPriority, setSelectedPriority] = useState('all'); // 'all', 'high', 'medium', 'low'
+  const [sortBy, setSortBy] = useState('date'); // 'date', 'priority'
 
   // Memoized function to get location based on type
   const getLocation = useCallback((type) => {
-    return LOCATION_MAPPING[type] || "Not specified";
+    // Check if the type includes any of the known types
+    for (const [key, value] of Object.entries(LOCATION_MAPPING)) {
+      if (type.includes(key)) {
+        return value;
+      }
+    }
+    return "Not specified";
   }, []);
 
-  // Memoized function to create notification object
-  const createNotification = useCallback((data, type = "appointment") => {
-    const location = getLocation(data.type);
-    return {
-      id: data.id || Date.now(),
-      title: type === "reminder" ? "Upcoming Appointment Reminder" : "New Appointment Created",
-      date: data.date,
-      time: data.time,
-      location,
-      notes: type === "reminder" 
-        ? `Reminder: You have an appointment scheduled for ${data.date} at ${data.time}. Please arrive at ${location} 15 minutes before your scheduled time.`
-        : `Your appointment is scheduled at ${location}. Please arrive 15 minutes before your scheduled time.`,
-      read: false,
-      priority: data.priority || "high",
-      type,
-      appointmentId: data.id || data.appointmentId
-    };
-  }, [getLocation]);
-
-  // Load notifications and appointments
+  // Handle new appointments
   useEffect(() => {
-    const loadData = () => {
-      // Load notifications
-      const savedNotifications = localStorage.getItem('notifications');
-      if (savedNotifications) {
-        setNotifications(JSON.parse(savedNotifications));
-      }
+    const handleNewAppointment = (event) => {
+      console.log('Received new appointment event:', event.detail);
+      const { appointmentId, date, time, location, notes, type, priority } = event.detail;
+      
+      // Check if we've already processed this appointment
+      if (!processedAppointmentIds.has(appointmentId)) {
+        const newNotification = {
+          id: generateUniqueId(appointmentId, 'appointment'),
+          title: "New Appointment Created",
+          date,
+          time,
+          location,
+          notes,
+          type: "appointment",
+          read: false,
+          priority: priority || "medium",
+          appointmentId
+        };
 
-      // Load appointments
-      const savedAppointments = localStorage.getItem('appointments');
-      if (savedAppointments) {
-        const appointments = JSON.parse(savedAppointments);
-        const appointmentNotifications = appointments.map(appointment => 
-          createNotification(appointment)
-        );
+        console.log('Creating new notification:', newNotification);
+        processedAppointmentIds.add(appointmentId);
         
         setNotifications(prev => {
-          const updated = [...appointmentNotifications, ...prev];
+          const updated = [newNotification, ...prev];
           localStorage.setItem('notifications', JSON.stringify(updated));
           return updated;
         });
       }
     };
 
-    loadData();
-  }, [createNotification]);
-
-  // Handle new appointments
-  useEffect(() => {
-    const handleNewAppointment = (event) => {
-      const newNotification = createNotification(event.detail);
-      
-      setNotifications(prev => {
-        const updated = [newNotification, ...prev];
-        localStorage.setItem('notifications', JSON.stringify(updated));
-        return updated;
-      });
-    };
-
     window.addEventListener('newAppointment', handleNewAppointment);
     return () => window.removeEventListener('newAppointment', handleNewAppointment);
-  }, [createNotification]);
+  }, [processedAppointmentIds]);
 
   // Check for upcoming appointments
   useEffect(() => {
     const checkUpcomingAppointments = () => {
       const now = new Date();
       const newReminders = notifications
-        .filter(notification => notification.type === "appointment")
+        .filter(notification => 
+          notification.type === "appointment" && 
+          !processedAppointmentIds.has(`${notification.appointmentId}-reminder`)
+        )
         .reduce((acc, notification) => {
           const appointmentDate = new Date(`${notification.date} ${notification.time}`);
           const timeDiff = appointmentDate - now;
           
           if (timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000) {
-            acc.push(createNotification(notification, "reminder"));
+            const reminderNotification = {
+              id: generateUniqueId(notification.appointmentId, 'reminder'),
+              title: "Upcoming Appointment Reminder",
+              date: notification.date,
+              time: notification.time,
+              location: notification.location,
+              notes: `Reminder: You have an appointment scheduled for ${notification.date} at ${notification.time}. Please arrive at ${notification.location} 15 minutes before your scheduled time.`,
+              type: "reminder",
+              read: false,
+              priority: notification.priority,
+              appointmentId: notification.appointmentId
+            };
+            
+            processedAppointmentIds.add(`${notification.appointmentId}-reminder`);
+            acc.push(reminderNotification);
           }
           return acc;
         }, []);
@@ -112,7 +114,56 @@ const NotificationPage = () => {
     const interval = setInterval(checkUpcomingAppointments, 60 * 60 * 1000);
     checkUpcomingAppointments();
     return () => clearInterval(interval);
-  }, [notifications, createNotification]);
+  }, [notifications, processedAppointmentIds]);
+
+  // Load notifications and appointments
+  useEffect(() => {
+    const loadData = () => {
+      // Load notifications
+      const savedNotifications = localStorage.getItem('notifications');
+      if (savedNotifications) {
+        const parsedNotifications = JSON.parse(savedNotifications);
+        // Initialize processed appointment IDs from existing notifications
+        parsedNotifications.forEach(notification => {
+          processedAppointmentIds.add(notification.appointmentId);
+        });
+        setNotifications(parsedNotifications);
+      }
+
+      // Load appointments and create notifications only for new ones
+      const savedAppointments = localStorage.getItem('appointments');
+      if (savedAppointments) {
+        const appointments = JSON.parse(savedAppointments);
+        const newAppointmentNotifications = appointments
+          .filter(appointment => !processedAppointmentIds.has(appointment.id))
+          .map(appointment => {
+            processedAppointmentIds.add(appointment.id);
+            return {
+              id: generateUniqueId(appointment.id, 'appointment'),
+              title: "New Appointment Created",
+              date: appointment.date,
+              time: appointment.time,
+              location: appointment.location || getLocation(appointment.type),
+              notes: appointment.notes,
+              type: "appointment",
+              read: false,
+              priority: appointment.priority || "medium",
+              appointmentId: appointment.id
+            };
+          });
+        
+        if (newAppointmentNotifications.length > 0) {
+          setNotifications(prev => {
+            const updated = [...newAppointmentNotifications, ...prev];
+            localStorage.setItem('notifications', JSON.stringify(updated));
+            return updated;
+          });
+        }
+      }
+    };
+
+    loadData();
+  }, [getLocation, processedAppointmentIds]);
 
   // Memoized notification actions
   const dismissNotification = useCallback((id) => {
@@ -152,14 +203,51 @@ const NotificationPage = () => {
     }
   }, [tempNotifications, undoTimeout]);
 
-  // Memoized sorted notifications
-  const sortedNotifications = useMemo(() => {
-    return [...notifications].sort((a, b) => {
+  // Memoized filtered and sorted notifications
+  const filteredAndSortedNotifications = useMemo(() => {
+    let filtered = [...notifications];
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(notification => 
+        notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notification.notes.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notification.location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply read/unread filter
+    if (filter === 'unread') {
+      filtered = filtered.filter(notification => !notification.read);
+    } else if (filter === 'read') {
+      filtered = filtered.filter(notification => notification.read);
+    }
+
+    // Apply priority filter
+    if (selectedPriority !== 'all') {
+      filtered = filtered.filter(notification => notification.priority === selectedPriority);
+    }
+
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      if (sortBy === 'priority') {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
       const dateA = new Date(`${a.date} ${a.time}`);
       const dateB = new Date(`${b.date} ${b.time}`);
       return dateB - dateA;
     });
-  }, [notifications]);
+  }, [notifications, filter, searchQuery, selectedPriority, sortBy]);
+
+  // Notification statistics
+  const stats = useMemo(() => ({
+    total: notifications.length,
+    unread: notifications.filter(n => !n.read).length,
+    highPriority: notifications.filter(n => n.priority === 'high').length,
+    mediumPriority: notifications.filter(n => n.priority === 'medium').length,
+    lowPriority: notifications.filter(n => n.priority === 'low').length
+  }), [notifications]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -167,16 +255,84 @@ const NotificationPage = () => {
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
+        {/* Notification Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-700">Total Notifications</h3>
+            <p className="text-3xl font-bold text-blue-500">{stats.total}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-700">Unread</h3>
+            <p className="text-3xl font-bold text-red-500">{stats.unread}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-700">High Priority</h3>
+            <p className="text-3xl font-bold text-red-500">{stats.highPriority}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-700">Medium Priority</h3>
+            <p className="text-3xl font-bold text-yellow-500">{stats.mediumPriority}</p>
+          </div>
+        </div>
+
+        {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="flex-1">
+              <div className="relative">
+                <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search notifications..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Notifications</option>
+                <option value="unread">Unread</option>
+                <option value="read">Read</option>
+              </select>
+              <select
+                value={selectedPriority}
+                onChange={(e) => setSelectedPriority(e.target.value)}
+                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Priorities</option>
+                <option value="high">High Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="low">Low Priority</option>
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="date">Sort by Date</option>
+                <option value="priority">Sort by Priority</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Your Notifications</h2>
-          {sortedNotifications.length === 0 ? (
+          {filteredAndSortedNotifications.length === 0 ? (
             <div className="text-center py-8">
               <AiOutlineBell className="mx-auto text-6xl text-gray-400 mb-4" />
-              <p className="text-gray-500 text-lg">No new notifications</p>
+              <p className="text-gray-500 text-lg">No notifications found</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {sortedNotifications.map((notification) => (
+              {filteredAndSortedNotifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`bg-white p-4 rounded-lg border-l-4 shadow-md transition-all duration-200 hover:shadow-lg hover:border-blue-300 hover:bg-blue-50 ${
@@ -232,7 +388,7 @@ const NotificationPage = () => {
                   </div>
                 </div>
               ))}
-              {sortedNotifications.length > 0 && (
+              {filteredAndSortedNotifications.length > 0 && (
                 <div className="flex justify-end mt-4">
                   <button
                     onClick={clearAllNotifications}
